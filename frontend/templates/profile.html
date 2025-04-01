@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">个人信息</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">姓名</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">性别</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="男" {% if current_user.gender == '男' %}selected{% endif %}>男</option>
+                                    <option value="女" {% if current_user.gender == '女' %}selected{% endif %}>女</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="ethnicity" class="form-label">民族</label>
+                                <input type="text" class="form-control" id="ethnicity" name="ethnicity" value="{{ current_user.ethnicity }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="birth_date" class="form-label">出生年月</label>
+                                <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ current_user.birth_date.strftime('%Y-%m-%d') if current_user.birth_date }}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="major" class="form-label">专业</label>
+                            <input type="text" class="form-control" id="major" name="major" value="{{ current_user.major }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="department" class="form-label">部门</label>
+                            <input type="text" class="form-control" id="department" name="department" value="{{ current_user.department }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">职称</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ current_user.title }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bachelor_school" class="form-label">本科毕业学校</label>
+                            <input type="text" class="form-control" id="bachelor_school" name="bachelor_school" value="{{ current_user.bachelor_school }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="master_school" class="form-label">硕士毕业学校（可选）</label>
+                            <input type="text" class="form-control" id="master_school" name="master_school" value="{{ current_user.master_school }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phd_school" class="form-label">博士毕业学校（可选）</label>
+                            <input type="text" class="form-control" id="phd_school" name="phd_school" value="{{ current_user.phd_school }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="research_direction" class="form-label">研究方向</label>
+                            <textarea class="form-control" id="research_direction" name="research_direction" rows="3" required>{{ current_user.research_direction }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="work_start_date" class="form-label">参加工作时间</label>
+                            <input type="date" class="form-control" id="work_start_date" name="work_start_date" value="{{ current_user.work_start_date.strftime('%Y-%m-%d') if current_user.work_start_date }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">新密码（留空则不修改）</label>
+                            <input type="password" class="form-control" id="password" name="password">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">确认新密码</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">返回</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">欢迎使用高校政务系统</h1>
+            <p class="lead mb-4">这是一个简单高效的高校政务管理系统，支持多角色权限管理和文件上传下载功能。</p>
+            
+            {% if current_user.is_authenticated %}
+                <div class="alert alert-success">
+                    您已登录为 {{ current_user.name }} ({{ current_user.role }})
+                </div>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">进入系统</a>
+            {% else %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">系统功能</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-person-check"></i> 多角色用户管理</li>
+                            <li><i class="bi bi-file-earmark-text"></i> 个人信息管理</li>
+                            <li><i class="bi bi-upload"></i> 文件上传下载</li>
+                            <li><i class="bi bi-shield-check"></i> 安全权限控制</li>
+                        </ul>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">立即登录</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0 text-primary-color">教师统计数据</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        当前共有 {{ total_teachers }} 名教师
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 职称分布 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">职称分布</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="titleChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 性别分布 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">性别分布</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 年龄分布 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">年龄分布</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 工作年限分布 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">工作年限分布</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="workYearsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// 设置图表颜色
+const colors = [
+    'rgba(255, 99, 132, 0.8)',
+    'rgba(54, 162, 235, 0.8)',
+    'rgba(255, 206, 86, 0.8)',
+    'rgba(75, 192, 192, 0.8)',
+    'rgba(153, 102, 255, 0.8)'
+];
+
+// 职称分布图表
+const titleData = {
+    labels: {{ title_stats | map(attribute=0) | list | tojson }},
+    data: {{ title_stats | map(attribute=1) | list | tojson }}
+};
+
+new Chart(document.getElementById('titleChart'), {
+    type: 'pie',
+    data: {
+        labels: titleData.labels,
+        datasets: [{
+            data: titleData.data,
+            backgroundColor: colors
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// 性别分布图表
+const genderData = {
+    labels: {{ gender_stats | map(attribute=0) | list | tojson }},
+    data: {{ gender_stats | map(attribute=1) | list | tojson }}
+};
+
+new Chart(document.getElementById('genderChart'), {
+    type: 'doughnut',
+    data: {
+        labels: genderData.labels,
+        datasets: [{
+            data: genderData.data,
+            backgroundColor: colors
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// 年龄分布图表
+const ageData = {
+    labels: {{ age_ranges.keys() | list | tojson }},
+    data: {{ age_ranges.values() | list | tojson }}
+};
+
+new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: {
+        labels: ageData.labels,
+        datasets: [{
+            label: '人数',
+            data: ageData.data,
+            backgroundColor: colors[0]
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// 工作年限分布图表
+const workYearsData = {
+    labels: {{ work_years_ranges.keys() | list | tojson }},
+    data: {{ work_years_ranges.values() | list | tojson }}
+};
+
+new Chart(document.getElementById('workYearsChart'), {
+    type: 'bar',
+    data: {
+        labels: workYearsData.labels,
+        datasets: [{
+            label: '人数',
+            data: workYearsData.data,
+            backgroundColor: colors[1]
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 

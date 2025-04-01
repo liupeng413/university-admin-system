@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0 text-primary-color">教师详细信息</h2>
+                {% if current_user.role == 'admin' or current_user.id == teacher.id %}
+                <a href="{{ url_for('edit_teacher', id=teacher.id) }}" class="btn btn-outline-danger">
+                    <i class="bi bi-pencil"></i> 编辑信息
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-group mb-4">
+                        <h5 class="section-title">基本信息</h5>
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%" class="text-muted">工号：</th>
+                                    <td>{{ teacher.employee_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">姓名：</th>
+                                    <td>{{ teacher.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">性别：</th>
+                                    <td>{{ teacher.gender }}</td>
+                                </tr>
+                                <tr>
+                                    <th>民族</th>
+                                    <td>{{ teacher.ethnicity }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">籍贯：</th>
+                                    <td>{{ teacher.hometown if teacher.hometown else '暂无' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">出生日期：</th>
+                                    <td>{{ teacher.birth_date.strftime('%Y-%m-%d') if teacher.birth_date else '暂无' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">入校时间：</th>
+                                    <td>{{ teacher.work_start_date.strftime('%Y-%m-%d') if teacher.work_start_date else '暂无' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-group mb-4">
+                        <h5 class="section-title">工作信息</h5>
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%" class="text-muted">学科类别：</th>
+                                    <td>{{ teacher.major }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">职称：</th>
+                                    <td>{{ teacher.title }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">职务：</th>
+                                    <td>{{ teacher.position if teacher.position else '暂无' }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted">研究方向：</th>
+                                    <td>{{ teacher.research_direction }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="info-group mb-4">
+                        <h5 class="section-title">联系信息</h5>
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="15%" class="text-muted">家庭住址：</th>
+                                    <td>{{ teacher.address if teacher.address else '暂无' }}</td>
+                                </tr>
+                                <tr>
+                                    <th width="15%" class="text-muted">联系电话：</th>
+                                    <td>{{ teacher.phone if teacher.phone else '暂无' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-group">
+                <h5 class="section-title">教育背景</h5>
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="15%" class="text-muted">本科院校：</th>
+                            <td>{{ teacher.bachelor_school }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">专业：</th>
+                            <td>{{ teacher.major }}</td>
+                        </tr>
+                        {% if teacher.master_school %}
+                        <tr>
+                            <th class="text-muted">硕士院校：</th>
+                            <td>{{ teacher.master_school }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if teacher.phd_school %}
+                        <tr>
+                            <th class="text-muted">博士院校：</th>
+                            <td>{{ teacher.phd_school }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0 text-primary-color">教师管理</h2>
+                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <i class="bi bi-funnel"></i> 筛选
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>工号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>民族</th>
+                            <th>出生年月</th>
+                            <th>入校时间</th>
+                            <th>学科类别</th>
+                            <th>职称</th>
+                            <th class="text-end">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td>{{ teacher.employee_number }}</td>
+                            <td>{{ teacher.name }}</td>
+                            <td>{{ teacher.gender }}</td>
+                            <td>{{ teacher.ethnicity }}</td>
+                            <td>{{ teacher.birth_date.strftime('%Y-%m-%d') if teacher.birth_date else '暂无' }}</td>
+                            <td>{{ teacher.work_start_date.strftime('%Y-%m-%d') if teacher.work_start_date else '暂无' }}</td>
+                            <td>{{ teacher.major }}</td>
+                            <td>{{ teacher.title }}</td>
+                            <td class="text-end">
+                                <a href="{{ url_for('view_teacher', id=teacher.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> 查看
+                                </a>
+                                {% if current_user.role == 'admin' or current_user.id == teacher.id %}
+                                <a href="{{ url_for('edit_teacher', id=teacher.id) }}" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">暂无教师数据</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 筛选模态框 -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary-color">筛选条件</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">专业</label>
+                        <select class="form-select">
+                            <option value="">全部</option>
+                            <option>计算机科学与技术</option>
+                            <option>软件工程</option>
+                            <option>人工智能</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">职称</label>
+                        <select class="form-select">
+                            <option value="">全部</option>
+                            <option>教授</option>
+                            <option>副教授</option>
+                            <option>讲师</option>
+                            <option>助教</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger">应用筛选</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

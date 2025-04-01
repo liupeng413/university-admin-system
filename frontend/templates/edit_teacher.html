@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0 text-primary-color">{{ '编辑' if teacher else '新增' }}教师信息</h2>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <div class="row">
+                    <!-- 基本信息 -->
+                    <div class="col-md-6">
+                        <h5 class="section-title">基本信息</h5>
+                        {% if current_user.role == 'admin' %}
+                        <div class="mb-3">
+                            <label for="employee_number" class="form-label">工号</label>
+                            <input type="number" class="form-control" id="employee_number" name="employee_number" value="{{ teacher.employee_number if teacher else 0 }}">
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ teacher.name if teacher else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">性别</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="男" {{ 'selected' if teacher and teacher.gender == '男' else '' }}>男</option>
+                                <option value="女" {{ 'selected' if teacher and teacher.gender == '女' else '' }}>女</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ethnicity" class="form-label">民族</label>
+                            <select class="form-select" id="ethnicity" name="ethnicity" required>
+                                <option value="汉族" {{ 'selected' if teacher and teacher.ethnicity == '汉族' else '' }}>汉族</option>
+                                <option value="满族" {{ 'selected' if teacher and teacher.ethnicity == '满族' else '' }}>满族</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="hometown" class="form-label">籍贯</label>
+                            <input type="text" class="form-control" id="hometown" name="hometown" value="{{ teacher.hometown if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="birth_date" class="form-label">出生日期</label>
+                            <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ teacher.birth_date if teacher else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="work_start_date" class="form-label">入校时间</label>
+                            <input type="date" class="form-control" id="work_start_date" name="work_start_date" value="{{ teacher.work_start_date if teacher else '' }}" required>
+                        </div>
+                    </div>
+                    
+                    <!-- 工作信息 -->
+                    <div class="col-md-6">
+                        <h5 class="section-title">工作与教育信息</h5>
+                        <div class="mb-3">
+                            <label for="major" class="form-label">学科类别</label>
+                            <input type="text" class="form-control" id="major" name="major" value="{{ teacher.major if teacher else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">职称</label>
+                            <select class="form-select" id="title" name="title" required autocomplete="off">
+                                <option value="" disabled selected>请选择职称</option>
+                                <option value="教授" {{ 'selected' if teacher and teacher.title == '教授' else '' }}>教授</option>
+                                <option value="副教授" {{ 'selected' if teacher and teacher.title == '副教授' else '' }}>副教授</option>
+                                <option value="讲师" {{ 'selected' if teacher and teacher.title == '讲师' else '' }}>讲师</option>
+                                <option value="助教" {{ 'selected' if teacher and teacher.title == '助教' else '' }}>助教</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="position" class="form-label">职务</label>
+                            <input type="text" class="form-control" id="position" name="position" value="{{ teacher.position if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">家庭住址</label>
+                            <input type="text" class="form-control" id="address" name="address" value="{{ teacher.address if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">联系电话</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ teacher.phone if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bachelor_school" class="form-label">本科毕业院校</label>
+                            <input type="text" class="form-control" id="bachelor_school" name="bachelor_school" value="{{ teacher.bachelor_school if teacher else '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="master_school" class="form-label">硕士院校</label>
+                            <input type="text" class="form-control" id="master_school" name="master_school" value="{{ teacher.master_school if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phd_school" class="form-label">博士院校</label>
+                            <input type="text" class="form-control" id="phd_school" name="phd_school" value="{{ teacher.phd_school if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="research_direction" class="form-label">研究方向</label>
+                            <input type="text" class="form-control" id="research_direction" name="research_direction" value="{{ teacher.research_direction if teacher else '' }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-danger">保存</button>
+                    <a href="{{ url_for('list_teachers') }}" class="btn btn-outline-secondary ms-2">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

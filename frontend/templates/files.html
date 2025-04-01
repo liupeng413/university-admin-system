@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>文件管理</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                上传新文件
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>文件名</th>
+                            {% if current_user.role == 'admin' %}
+                            <th>上传者</th>
+                            {% endif %}
+                            <th>上传时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                        <tr>
+                            <td>{{ file.original_filename }}</td>
+                            {% if current_user.role == 'admin' %}
+                            <td>{{ file.owner.name }}</td>
+                            {% endif %}
+                            <td>{{ file.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('download_file', filename=file.filename) }}" class="btn btn-sm btn-info">
+                                    下载
+                                </a>
+                                {% if current_user.role == 'admin' or current_user.id == file.user_id %}
+                                <button class="btn btn-sm btn-danger" onclick="deleteFile('{{ file.filename }}')">
+                                    删除
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="{% if current_user.role == 'admin' %}4{% else %}3{% endif %}" class="text-center">
+                                暂无文件
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 上传文件模态框 -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">上传文件</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">选择文件</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">上传</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteFile(filename) {
+    if (confirm('确定要删除这个文件吗？')) {
+        fetch(`/delete_file/${filename}`, {
+            method: 'DELETE'
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('删除失败');
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

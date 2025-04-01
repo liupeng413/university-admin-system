@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">登录</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('login') }}" autocomplete="off">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">姓名拼音</label>
+                            <input type="text" class="form-control" id="username" name="username" required autocomplete="off" placeholder="请输入姓名拼音（小写）">
+                            <div class="form-text text-muted">例如：zhangsan</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">密码</label>
+                            <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password">
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">登录</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
