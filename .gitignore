@@ -24,6 +24,8 @@ venv/
 # Database
 *.db
 *.sqlite3
+# 特别包含 university.db
+!backend/university.db
 
 # IDE
 .idea/

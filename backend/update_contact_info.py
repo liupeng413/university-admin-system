@@ -5,7 +5,7 @@ def update_contact_info():
     """从Excel文件更新教师的联系信息、研究方向和学科类别"""
     try:
         # 读取Excel文件
-        df = pd.read_excel('20241204教师名单(1).xls')
+        df = pd.read_excel('../20241204教师名单(1).xls')
         
         # 获取所有教师
         teachers = User.query.filter_by(role='teacher').all()
