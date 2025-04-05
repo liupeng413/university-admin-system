@@ -1,22 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% macro format_date(date) %}
-    {% if date %}
-        {{ date.strftime('%Y-%m-%d') }}
-    {% else %}
-        
-    {% endif %}
-{% endmacro %}
-
-{% macro format_value(value) %}
-    {% if value and value != 'None' %}
-        {{ value }}
-    {% else %}
-        
-    {% endif %}
-{% endmacro %}
-
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-12">
@@ -60,33 +44,11 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">政治面貌</label>
-                                    <select class="form-select" name="political_status" onchange="handlePoliticalStatusChange(this)">
-                                        <option value="">请选择</option>
-                                        <option value="中共党员" {% if current_user.political_status == '中共党员' %}selected{% endif %}>中共党员</option>
-                                        <option value="中共预备党员" {% if current_user.political_status == '中共预备党员' %}selected{% endif %}>中共预备党员</option>
-                                        <option value="共青团员" {% if current_user.political_status == '共青团员' %}selected{% endif %}>共青团员</option>
-                                        <option value="民革党员" {% if current_user.political_status == '民革党员' %}selected{% endif %}>民革党员</option>
-                                        <option value="民盟盟员" {% if current_user.political_status == '民盟盟员' %}selected{% endif %}>民盟盟员</option>
-                                        <option value="民建会员" {% if current_user.political_status == '民建会员' %}selected{% endif %}>民建会员</option>
-                                        <option value="民进会员" {% if current_user.political_status == '民进会员' %}selected{% endif %}>民进会员</option>
-                                        <option value="农工党党员" {% if current_user.political_status == '农工党党员' %}selected{% endif %}>农工党党员</option>
-                                        <option value="致公党党员" {% if current_user.political_status == '致公党党员' %}selected{% endif %}>致公党党员</option>
-                                        <option value="九三学社社员" {% if current_user.political_status == '九三学社社员' %}selected{% endif %}>九三学社社员</option>
-                                        <option value="台盟盟员" {% if current_user.political_status == '台盟盟员' %}selected{% endif %}>台盟盟员</option>
-                                        <option value="无党派人士" {% if current_user.political_status == '无党派人士' %}selected{% endif %}>无党派人士</option>
-                                        <option value="群众" {% if current_user.political_status == '群众' %}selected{% endif %}>群众</option>
-                                    </select>
+                                    <input type="text" class="form-control" name="political_status" placeholder="待添加" value="{{ current_user.political_status if current_user.political_status and current_user.political_status != 'None' else '' }}">
                                 </div>
-                                <div class="col-md-6" id="party_branch_container" {% if not current_user.political_status or current_user.political_status not in ['中共党员', '中共预备党员'] %}style="display: none;"{% endif %}>
-                                    <label class="form-label">所属党支部</label>
-                                    <select class="form-select" name="party_branch" id="party_branch" {% if not current_user.political_status or current_user.political_status not in ['中共党员', '中共预备党员'] %}disabled{% endif %}>
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.party_branch == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6" id="party_join_date_container" {% if current_user.political_status in ['群众', '无党派人士'] %}style="display: none;"{% endif %}>
+                                <div class="col-md-6">
                                     <label class="form-label">入党时间</label>
-                                    <input type="date" class="form-control" name="party_join_date" id="party_join_date" value="{{ current_user.party_join_date.strftime('%Y-%m-%d') if current_user.party_join_date else '' }}" {% if not current_user.political_status or current_user.political_status not in ['中共党员', '中共预备党员'] %}disabled{% endif %}>
+                                    <input type="date" class="form-control" name="party_join_date" value="{{ current_user.party_join_date.strftime('%Y-%m-%d') if current_user.party_join_date else '' }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">籍贯</label>
@@ -113,22 +75,11 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">学历</label>
-                                    <select class="form-select" name="education_level">
-                                        <option value="">请选择</option>
-                                        <option value="博士研究生" {% if current_user.education_level == '博士研究生' %}selected{% endif %}>博士研究生</option>
-                                        <option value="硕士研究生" {% if current_user.education_level == '硕士研究生' %}selected{% endif %}>硕士研究生</option>
-                                        <option value="本科" {% if current_user.education_level == '本科' %}selected{% endif %}>本科</option>
-                                        <option value="专科" {% if current_user.education_level == '专科' %}selected{% endif %}>专科</option>
-                                    </select>
+                                    <input type="text" class="form-control" name="education_level" placeholder="待添加" value="{{ current_user.education_level if current_user.education_level and current_user.education_level != 'None' else '' }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">学位</label>
-                                    <select class="form-select" name="degree">
-                                        <option value="">请选择</option>
-                                        <option value="博士" {% if current_user.degree == '博士' %}selected{% endif %}>博士</option>
-                                        <option value="硕士" {% if current_user.degree == '硕士' %}selected{% endif %}>硕士</option>
-                                        <option value="学士" {% if current_user.degree == '学士' %}selected{% endif %}>学士</option>
-                                    </select>
+                                    <input type="text" class="form-control" name="degree" placeholder="待添加" value="{{ current_user.degree if current_user.degree and current_user.degree != 'None' else '' }}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">获得学历时间</label>
@@ -228,27 +179,6 @@
                                         <option value="其他" {% if current_user.subject == '其他' %}selected{% endif %}>其他</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属教学团队</label>
-                                    <select class="form-select" name="teaching_team">
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.teaching_team == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属科研团队</label>
-                                    <select class="form-select" name="research_team">
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.research_team == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属课题组</label>
-                                    <select class="form-select" name="project_group">
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.project_group == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
 
@@ -262,61 +192,24 @@
     </div>
 </div>
 
-<style>
-.avatar-upload {
-    cursor: pointer;
-}
-
-.avatar-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.avatar-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
-
-.avatar-overlay i {
-    font-size: 24px;
-    margin-bottom: 8px;
-}
-
-.avatar-wrapper:hover .avatar-overlay {
-    display: flex;
-}
-</style>
-
 <script>
-function togglePartyJoinDate() {
-    var politicalStatus = document.querySelector('select[name="political_status"]').value;
-    var partyJoinDateDiv = document.getElementById('partyJoinDateDiv');
-    if (politicalStatus === '中共党员') {
-        partyJoinDateDiv.style.display = 'block';
+function calculateAge(input) {
+    const birthDate = new Date(input.value);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    
+    const ageDisplay = document.getElementById('age-display');
+    if (input.value) {
+        ageDisplay.textContent = age + '岁';
     } else {
-        partyJoinDateDiv.style.display = 'none';
+        ageDisplay.textContent = '待添加';
     }
 }
-
-document.getElementById('photo').addEventListener('change', function(e) {
-    if (this.files && this.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.querySelector('.avatar-wrapper img').src = e.target.result;
-        };
-        reader.readAsDataURL(this.files[0]);
-    }
-});
 
 function submitForm(form) {
     fetch(form.action, {
@@ -365,19 +258,6 @@ function submitForm(form) {
             });
         });
 
-        // 更新头像（如果有变化）
-        const newAvatar = newForm.querySelector('.avatar-wrapper img');
-        const currentAvatar = document.querySelector('.avatar-wrapper img');
-        if (newAvatar && currentAvatar) {
-            currentAvatar.src = newAvatar.src;
-        }
-
-        // 重新计算年龄（如果有出生日期字段）
-        const birthDateInput = currentForm.querySelector('input[name="birth_date"]');
-        if (birthDateInput) {
-            calculateAge(birthDateInput);
-        }
-
         // 3秒后自动关闭消息
         setTimeout(() => {
             if (successMessage.parentNode) {
@@ -406,68 +286,5 @@ function submitForm(form) {
     });
     return false;
 }
-
-function calculateAge(input) {
-    const birthDate = new Date(input.value);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    
-    const ageDisplay = document.getElementById('age-display');
-    if (input.value) {
-        ageDisplay.textContent = age + '岁';
-    } else {
-        ageDisplay.textContent = '待添加';
-    }
-}
-
-// 页面加载时计算年龄
-document.addEventListener('DOMContentLoaded', function() {
-    const birthDateInput = document.querySelector('input[name="birth_date"]');
-    if (birthDateInput) {
-        calculateAge(birthDateInput);
-    }
-});
-
-function handlePoliticalStatusChange(select) {
-    const partyBranchContainer = document.getElementById('party_branch_container');
-    const partyBranchSelect = document.getElementById('party_branch');
-    const partyJoinDateContainer = document.getElementById('party_join_date_container');
-    const partyJoinDateInput = document.getElementById('party_join_date');
-    
-    const isPartyMember = select.value === '中共党员' || select.value === '中共预备党员';
-    
-    // 处理党支部显示/隐藏
-    if (isPartyMember) {
-        partyBranchContainer.style.display = '';
-        partyBranchSelect.disabled = false;
-    } else {
-        partyBranchContainer.style.display = 'none';
-        partyBranchSelect.disabled = true;
-        partyBranchSelect.value = '';
-    }
-    
-    // 处理入党时间显示/隐藏
-    if (select.value === '群众' || select.value === '无党派人士') {
-        partyJoinDateContainer.style.display = 'none';
-        partyJoinDateInput.disabled = true;
-        partyJoinDateInput.value = '';
-    } else {
-        partyJoinDateContainer.style.display = '';
-        partyJoinDateInput.disabled = false;
-    }
-}
-
-// 页面加载时初始化政治面貌和入党时间的联动
-document.addEventListener('DOMContentLoaded', function() {
-    const politicalStatusSelect = document.querySelector('select[name="political_status"]');
-    if (politicalStatusSelect) {
-        handlePoliticalStatusChange(politicalStatusSelect);
-    }
-});
 </script>
 {% endblock %} 

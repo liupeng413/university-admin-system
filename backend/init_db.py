@@ -1,5 +1,5 @@
 import os
-from app import db, User
+from app import db, User, app
 from werkzeug.security import generate_password_hash
 from datetime import datetime, date
 
@@ -9,10 +9,10 @@ def init_db():
     if not os.path.exists('instance'):
         os.makedirs('instance')
     
-    # 删除所有表
-    db.drop_all()
-    # 创建所有表
-    db.create_all()
+    # 创建所有表（如果不存在）
+    with app.app_context():
+        db.create_all()
+        print("数据库表已创建/更新")
     
     # 创建管理员账号
     if not User.query.filter_by(username='admin').first():
@@ -73,6 +73,15 @@ def init_db():
             work_start_date=date(2015, 9, 1)
         )
         db.session.add(user)
+    
+    # 更新指定用户的权限
+    zhangyanpeng = User.query.filter_by(username='zhangyanpeng').first()
+    if zhangyanpeng:
+        zhangyanpeng.role = 'admin'
+        
+    wangpeng = User.query.filter_by(username='wangpeng').first()
+    if wangpeng:
+        wangpeng.role = 'admin'
     
     db.session.commit()
 

@@ -37,8 +37,21 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label for="political_status" class="form-label">政治面貌</label>
+                            <select class="form-select" id="political_status" name="political_status" required>
+                                <option value="" disabled {{ 'selected' if not teacher or not teacher.political_status else '' }}>请选择政治面貌</option>
+                                <option value="中共党员" {{ 'selected' if teacher and teacher.political_status == '中共党员' else '' }}>中共党员</option>
+                                <option value="群众" {{ 'selected' if teacher and teacher.political_status == '群众' else '' }}>群众</option>
+                                <option value="九三学社社员" {{ 'selected' if teacher and teacher.political_status == '九三学社社员' else '' }}>九三学社社员</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="hometown" class="form-label">籍贯</label>
                             <input type="text" class="form-control" id="hometown" name="hometown" value="{{ teacher.hometown if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_number" class="form-label">身份证号</label>
+                            <input type="text" class="form-control" id="id_number" name="id_number" value="{{ teacher.id_number if teacher else '' }}" pattern="[0-9Xx]{18}" maxlength="18" required>
                         </div>
                         <div class="mb-3">
                             <label for="birth_date" class="form-label">出生日期</label>
@@ -78,6 +91,10 @@
                         <div class="mb-3">
                             <label for="phone" class="form-label">联系电话</label>
                             <input type="tel" class="form-control" id="phone" name="phone" value="{{ teacher.phone if teacher else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">电子邮件</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ teacher.email if teacher else '' }}" placeholder="example@example.com">
                         </div>
                         <div class="mb-3">
                             <label for="bachelor_school" class="form-label">本科毕业院校</label>

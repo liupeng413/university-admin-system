@@ -6,14 +6,15 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 from sqlalchemy import func
+from functools import wraps
 
 app = Flask(__name__, 
             template_folder='../frontend/templates',
             static_folder='../frontend/static')
 app.config['SECRET_KEY'] = 'your-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////project/university-admin-system/backend/university.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'university.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = '/project/university-admin-system/uploads'
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 db = SQLAlchemy(app)
@@ -26,27 +27,57 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # 数据模型
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.String(128))
     role = db.Column(db.String(20), nullable=False)  # admin, teacher, user
-    name = db.Column(db.String(100))
-    major = db.Column(db.String(100))  # 专业
-    title = db.Column(db.String(100))
-    gender = db.Column(db.String(10))  # 性别
-    ethnicity = db.Column(db.String(50))  # 民族
-    birth_date = db.Column(db.Date)  # 出生年月
-    hometown = db.Column(db.String(100))  # 籍贯
-    position = db.Column(db.String(100))  # 职务
-    address = db.Column(db.String(200))  # 家庭住址
-    phone = db.Column(db.String(20))  # 联系电话
-    bachelor_school = db.Column(db.String(100))  # 本科毕业学校
-    master_school = db.Column(db.String(100), nullable=True)  # 硕士毕业学校
-    phd_school = db.Column(db.String(100), nullable=True)  # 博士毕业学校
-    research_direction = db.Column(db.String(200))  # 研究方向
-    work_start_date = db.Column(db.Date)  # 入校时间
+    name = db.Column(db.String(80))
+    major = db.Column(db.String(100))
+    teaching_group = db.Column(db.String(100))
+    is_dual_teacher = db.Column(db.String(10))
+    award_title = db.Column(db.String(200))
+    talent_title = db.Column(db.String(200))
+    gender = db.Column(db.String(10))
+    ethnicity = db.Column(db.String(50))
+    birth_date = db.Column(db.Date)
+    id_number = db.Column(db.String(18))
+    political_status = db.Column(db.String(50))
+    party_join_date = db.Column(db.Date)
+    party_branch = db.Column(db.String(100))
+    hometown = db.Column(db.String(100))
+    position = db.Column(db.String(50))
+    address = db.Column(db.String(200))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(120))
+    education_level = db.Column(db.String(50))
+    degree = db.Column(db.String(50))
+    education_date = db.Column(db.Date)
+    degree_date = db.Column(db.Date)
+    bachelor_school = db.Column(db.String(100))
+    master_school = db.Column(db.String(100))
+    phd_school = db.Column(db.String(100))
+    research_direction = db.Column(db.String(200))
+    work_start_date = db.Column(db.Date)
+    career_start_date = db.Column(db.Date)
+    highest_title = db.Column(db.String(50))
+    highest_title_date = db.Column(db.Date)
     files = db.relationship('File', backref='owner', lazy=True)
     employee_number = db.Column(db.Integer, default=0)  # 工号
+    department = db.Column(db.String(100))
+    photo_path = db.Column(db.String(200))
+    subject = db.Column(db.String(50))
+    teaching_team = db.Column(db.String(100))
+    research_team = db.Column(db.String(100))
+    project_group = db.Column(db.String(100))
+
+    @property
+    def age(self):
+        """计算年龄"""
+        if not self.birth_date:
+            return None
+        today = datetime.now()
+        return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,33 +118,47 @@ def dashboard():
 def profile():
     if request.method == 'POST':
         try:
-            # 获取表单数据
+            # 处理基本信息
             current_user.name = request.form.get('name')
             current_user.gender = request.form.get('gender')
             current_user.ethnicity = request.form.get('ethnicity')
-            current_user.birth_date = datetime.strptime(request.form.get('birth_date'), '%Y-%m-%d').date()
-            current_user.major = request.form.get('major')
-            current_user.title = request.form.get('title')
-            current_user.bachelor_school = request.form.get('bachelor_school')
-            current_user.master_school = request.form.get('master_school')
-            current_user.phd_school = request.form.get('phd_school')
-            current_user.research_direction = request.form.get('research_direction')
-            current_user.work_start_date = datetime.strptime(request.form.get('work_start_date'), '%Y-%m-%d').date()
+            current_user.political_status = request.form.get('political_status')
+            current_user.party_branch = request.form.get('party_branch')
+            current_user.education_level = request.form.get('education_level')  # 添加学历字段处理
+            current_user.degree = request.form.get('degree')  # 添加学位字段处理
+            
+            # 处理日期字段
+            birth_date = request.form.get('birth_date')
+            if birth_date:
+                current_user.birth_date = datetime.strptime(birth_date, '%Y-%m-%d')
+            
+            party_join_date = request.form.get('party_join_date')
+            if party_join_date:
+                current_user.party_join_date = datetime.strptime(party_join_date, '%Y-%m-%d')
+            
+            education_date = request.form.get('education_date')  # 添加学历获得时间处理
+            if education_date:
+                current_user.education_date = datetime.strptime(education_date, '%Y-%m-%d')
+                
+            degree_date = request.form.get('degree_date')  # 添加学位获得时间处理
+            if degree_date:
+                current_user.degree_date = datetime.strptime(degree_date, '%Y-%m-%d')
+            
+            # ... 其他字段处理 ...
 
             # 如果提供了新密码
             password = request.form.get('password')
             if password:
                 if password != request.form.get('confirm_password'):
-                    flash('两次输入的密码不一致')
-                    return redirect(url_for('profile'))
+                    return render_template('profile.html', error='两次输入的密码不一致')
                 current_user.password_hash = generate_password_hash(password)
 
             db.session.commit()
-            flash('个人信息更新成功')
-            return redirect(url_for('dashboard'))
+            flash('个人信息更新成功！')
+            return render_template('profile.html')
         except Exception as e:
-            flash('更新失败：' + str(e))
-            return redirect(url_for('profile'))
+            db.session.rollback()
+            return render_template('profile.html', error=str(e))
 
     return render_template('profile.html')
 
@@ -201,21 +246,30 @@ def edit_teacher(id):
                 flash('无效的职称选择')
                 return redirect(url_for('edit_teacher', id=id))
 
+            # 添加日志
+            print("正在保存教师信息...")
+            print(f"身份证号: {request.form.get('id_number')}")
+
             teacher.name = request.form.get('name')
             teacher.gender = request.form.get('gender')
             teacher.ethnicity = request.form.get('ethnicity')
             teacher.birth_date = datetime.strptime(request.form.get('birth_date'), '%Y-%m-%d').date()
+            teacher.hometown = request.form.get('hometown')
+            teacher.id_number = request.form.get('id_number')
+            teacher.political_status = request.form.get('political_status')
+            teacher.party_join_date = datetime.strptime(request.form.get('party_join_date'), '%Y-%m-%d').date()
             teacher.major = request.form.get('major')
             teacher.title = title
             teacher.position = request.form.get('position')
+            teacher.department = request.form.get('department')
             teacher.address = request.form.get('address')
             teacher.phone = request.form.get('phone')
+            teacher.email = request.form.get('email')
             teacher.bachelor_school = request.form.get('bachelor_school')
             teacher.master_school = request.form.get('master_school')
             teacher.phd_school = request.form.get('phd_school')
             teacher.research_direction = request.form.get('research_direction')
             teacher.work_start_date = datetime.strptime(request.form.get('work_start_date'), '%Y-%m-%d').date()
-            teacher.hometown = request.form.get('hometown')
 
             db.session.commit()
             flash('教师信息更新成功')
@@ -398,6 +452,134 @@ def update_employee_number(id):
         flash('无效的工号')
     
     return redirect(url_for('list_teachers'))
+
+@app.route('/upload_photo', methods=['POST'])
+@login_required
+def upload_photo():
+    if 'photo' not in request.files:
+        return jsonify({'error': '没有选择文件'}), 400
+    
+    file = request.files['photo']
+    if file.filename == '':
+        return jsonify({'error': '没有选择文件'}), 400
+    
+    if file and allowed_file(file.filename):
+        # 生成唯一的文件名
+        filename = secure_filename(f"{current_user.id}_{file.filename}")
+        # 确保上传目录存在
+        upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'photos')
+        os.makedirs(upload_folder, exist_ok=True)
+        filepath = os.path.join(upload_folder, filename)
+        
+        # 保存文件
+        file.save(filepath)
+        
+        # 更新用户照片路径
+        current_user.photo_path = f"uploads/photos/{filename}"
+        db.session.commit()
+        
+        return jsonify({'success': True, 'photo_path': current_user.photo_path})
+    
+    return jsonify({'error': '不支持的文件类型'}), 400
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    """修改密码"""
+    data = request.get_json()
+    password = data.get('password')
+    confirm_password = data.get('confirm_password')
+    
+    if not password or not confirm_password:
+        return jsonify({'success': False, 'error': '密码不能为空'})
+        
+    if password != confirm_password:
+        return jsonify({'success': False, 'error': '两次输入的密码不一致'})
+    
+    try:
+        current_user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'admin':
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/teacher_stats')
+@login_required
+@admin_required
+def teacher_stats():
+    # 获取教师总数
+    total_teachers = User.query.filter_by(role='teacher').count()
+    
+    # 按学历统计
+    education_stats = db.session.query(
+        User.education_level,
+        func.count(User.id)
+    ).filter_by(role='teacher').group_by(User.education_level).all()
+    
+    # 按职称统计
+    title_stats = db.session.query(
+        User.highest_title,
+        func.count(User.id)
+    ).filter_by(role='teacher').group_by(User.highest_title).all()
+    
+    # 按性别统计
+    gender_stats = db.session.query(
+        User.gender,
+        func.count(User.id)
+    ).filter_by(role='teacher').group_by(User.gender).all()
+    
+    # 按双师统计
+    dual_teacher_stats = db.session.query(
+        User.is_dual_teacher,
+        func.count(User.id)
+    ).filter_by(role='teacher').group_by(User.is_dual_teacher).all()
+    
+    # 按年龄段统计
+    age_stats = {
+        '35岁以下': 0,
+        '36-45岁': 0,
+        '46-55岁': 0,
+        '56岁以上': 0
+    }
+    
+    teachers = User.query.filter_by(role='teacher').all()
+    for teacher in teachers:
+        if teacher.age:
+            if teacher.age <= 35:
+                age_stats['35岁以下'] += 1
+            elif teacher.age <= 45:
+                age_stats['36-45岁'] += 1
+            elif teacher.age <= 55:
+                age_stats['46-55岁'] += 1
+            else:
+                age_stats['56岁以上'] += 1
+    
+    return render_template('teacher_stats.html',
+                         total_teachers=total_teachers,
+                         education_stats=education_stats,
+                         title_stats=title_stats,
+                         gender_stats=gender_stats,
+                         dual_teacher_stats=dual_teacher_stats,
+                         age_stats=age_stats)
+
+@app.route('/all_teachers')
+@login_required
+@admin_required
+def all_teachers():
+    teachers = User.query.filter_by(role='teacher').all()
+    return render_template('all_teachers.html', teachers=teachers)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

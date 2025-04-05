@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">教师信息列表</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>工号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>年龄</th>
+                            <th>学历</th>
+                            <th>职称</th>
+                            <th>所属学科</th>
+                            <th>教研组</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td>{{ teacher.employee_number }}</td>
+                            <td>{{ teacher.name }}</td>
+                            <td>{{ teacher.gender }}</td>
+                            <td>{{ teacher.age if teacher.age else '未填写' }}</td>
+                            <td>{{ teacher.education_level if teacher.education_level else '未填写' }}</td>
+                            <td>{{ teacher.highest_title if teacher.highest_title else '未填写' }}</td>
+                            <td>{{ teacher.subject if teacher.subject else '未填写' }}</td>
+                            <td>{{ teacher.teaching_group if teacher.teaching_group else '未填写' }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#teacherModal{{ teacher.id }}">
+                                    查看详情
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- 详情模态框 -->
+                        <div class="modal fade" id="teacherModal{{ teacher.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">教师详细信息 - {{ teacher.name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong>工号：</strong> {{ teacher.employee_number }}</p>
+                                                <p><strong>姓名：</strong> {{ teacher.name }}</p>
+                                                <p><strong>性别：</strong> {{ teacher.gender }}</p>
+                                                <p><strong>民族：</strong> {{ teacher.ethnicity if teacher.ethnicity else '未填写' }}</p>
+                                                <p><strong>出生日期：</strong> {{ teacher.birth_date.strftime('%Y-%m-%d') if teacher.birth_date else '未填写' }}</p>
+                                                <p><strong>政治面貌：</strong> {{ teacher.political_status if teacher.political_status else '未填写' }}</p>
+                                                <p><strong>所属党支部：</strong> {{ teacher.party_branch if teacher.party_branch else '未填写' }}</p>
+                                                <p><strong>学历：</strong> {{ teacher.education_level if teacher.education_level else '未填写' }}</p>
+                                                <p><strong>学位：</strong> {{ teacher.degree if teacher.degree else '未填写' }}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong>职称：</strong> {{ teacher.highest_title if teacher.highest_title else '未填写' }}</p>
+                                                <p><strong>所属学科：</strong> {{ teacher.subject if teacher.subject else '未填写' }}</p>
+                                                <p><strong>教研组：</strong> {{ teacher.teaching_group if teacher.teaching_group else '未填写' }}</p>
+                                                <p><strong>研究方向：</strong> {{ teacher.research_direction if teacher.research_direction else '未填写' }}</p>
+                                                <p><strong>联系电话：</strong> {{ teacher.phone if teacher.phone else '未填写' }}</p>
+                                                <p><strong>电子邮箱：</strong> {{ teacher.email if teacher.email else '未填写' }}</p>
+                                                <p><strong>通讯地址：</strong> {{ teacher.address if teacher.address else '未填写' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('teacher_stats') }}" class="btn btn-primary">返回统计页面</a>
+    </div>
+</div>
+{% endblock %} 

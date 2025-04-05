@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">教师数据统计分析</h2>
+    
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">教师总数</h5>
+                    <p class="card-text display-4">{{ total_teachers }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 性别分布 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">性别分布</h5>
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 双师比例 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">双师型教师比例</h5>
+                    <canvas id="dualTeacherChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 学历分布 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">学历分布</h5>
+                    <canvas id="educationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 职称分布 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">职称分布</h5>
+                    <canvas id="titleChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 年龄分布 -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">年龄分布</h5>
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 性别分布饼图
+const genderData = {
+    labels: [{% for gender, count in gender_stats %}'{{ gender if gender else "未填写" }}',{% endfor %}],
+    datasets: [{
+        data: [{% for gender, count in gender_stats %}{{ count }},{% endfor %}],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+    }]
+};
+
+new Chart(document.getElementById('genderChart'), {
+    type: 'pie',
+    data: genderData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// 双师型教师饼图
+const dualTeacherData = {
+    labels: [{% for status, count in dual_teacher_stats %}'{{ "是" if status == "是" else "否" if status == "否" else "未填写" }}',{% endfor %}],
+    datasets: [{
+        data: [{% for status, count in dual_teacher_stats %}{{ count }},{% endfor %}],
+        backgroundColor: ['#4BC0C0', '#FF9F40', '#E7E9ED']
+    }]
+};
+
+new Chart(document.getElementById('dualTeacherChart'), {
+    type: 'pie',
+    data: dualTeacherData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// 学历分布柱状图
+const educationData = {
+    labels: [{% for level, count in education_stats %}'{{ level if level else "未填写" }}',{% endfor %}],
+    datasets: [{
+        label: '人数',
+        data: [{% for level, count in education_stats %}{{ count }},{% endfor %}],
+        backgroundColor: '#36A2EB'
+    }]
+};
+
+new Chart(document.getElementById('educationChart'), {
+    type: 'bar',
+    data: educationData,
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// 职称分布柱状图
+const titleData = {
+    labels: [{% for title, count in title_stats %}'{{ title if title else "未填写" }}',{% endfor %}],
+    datasets: [{
+        label: '人数',
+        data: [{% for title, count in title_stats %}{{ count }},{% endfor %}],
+        backgroundColor: '#FF6384'
+    }]
+};
+
+new Chart(document.getElementById('titleChart'), {
+    type: 'bar',
+    data: titleData,
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// 年龄分布柱状图
+const ageData = {
+    labels: Object.keys({{ age_stats|tojson }}),
+    datasets: [{
+        label: '人数',
+        data: Object.values({{ age_stats|tojson }}),
+        backgroundColor: '#4BC0C0',
+        borderColor: '#4BC0C0',
+        borderWidth: 1
+    }]
+};
+
+new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: ageData,
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 
