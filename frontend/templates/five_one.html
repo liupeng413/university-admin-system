@@ -15,7 +15,7 @@
         {% endif %}
     {% endwith %}
     
-    <form method="post" action="/save_five_one" id="fiveOneForm" onsubmit="return validateForm()">
+    <form method="post" action="/save_five_one" id="fiveOneForm" onsubmit="return validateFiveOneForm()">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3 d-flex align-items-center">
             <label class="form-label me-2">年份 <span class="text-danger">*</span></label>
@@ -27,161 +27,192 @@
             </select>
             <button type="button" class="btn btn-secondary" onclick="viewYearInfo()">查看</button>
         </div>
+        <!-- 添加记录按钮 -->
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary" onclick="addBookEntry()">添加记录</button>
+        </div>
         
-        <!-- 一本书 -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">一本书</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">书名 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="book_title" id="book_title" required>
+        <!-- 一本书（可动态添加） -->
+        <div id="books-container">
+            <div class="card mb-4 book-entry">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">一本书</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, 'book-entry')">删除</button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">书号 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="book_number" id="book_number" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">出版日期 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" name="publish_date" id="publish_date" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">出版社 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="publisher" id="publisher" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">编著者 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="author" id="author" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">是否有笔记</label>
-                    <select class="form-select" name="has_notes" id="has_notes">
-                        <option value="false">否</option>
-                        <option value="true">是</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- 一项教研成果 -->
-        <div class="card mb-4">
-            <div class="card-header bg-success text-white">
-                <h5 class="card-title mb-0">一项教研成果</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">成果名称 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="teaching_achievement_name" id="teaching_achievement_name" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">成果类型 <span class="text-danger">*</span></label>
-                    <select class="form-select" name="achievement_type" id="achievement_type" required>
-                        <option value="">请选择</option>
-                        <option value="论文">论文</option>
-                        <option value="项目">项目</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">时间 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" name="achievement_date" id="achievement_date" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">排名 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="achievement_ranking" id="achievement_ranking" required>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">书名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="book_title[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">书号 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="book_number[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">出版日期 <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="publish_date[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">出版社 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="publisher[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">编著者 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="author[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">是否有笔记</label>
+                        <select class="form-select" name="has_notes[]">
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 一项科研成果 -->
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">一项科研成果</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">成果名称 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="research_achievement_name" id="research_achievement_name" required>
+        <!-- 一项教研成果（可动态添加） -->
+        <div id="teaching-container">
+            <div class="card mb-4 teaching-entry">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">一项教研成果</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, 'teaching-entry')">删除</button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">成果类型 <span class="text-danger">*</span></label>
-                    <select class="form-select" name="research_type" id="research_type" required>
-                        <option value="">请选择</option>
-                        <option value="论文">论文</option>
-                        <option value="项目">项目</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">时间 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" name="research_date" id="research_date" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">排名 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="research_ranking" id="research_ranking" required>
-                </div>
-            </div>
-        </div>
-
-        <!-- 一项竞赛 -->
-        <div class="card mb-4">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="card-title mb-0">一项竞赛</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">竞赛名称 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="competition_name" id="competition_name" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">承办单位 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="competition_organizer" id="competition_organizer" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">竞赛类型 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="competition_type" id="competition_type" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">时间 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" name="competition_date" id="competition_date" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">获奖等级 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="award_level" id="award_level" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">学生姓名 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="student_names" id="student_names" placeholder="输入一个或多个学生姓名" required>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">成果名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="teaching_achievement_name[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">成果类型 <span class="text-danger">*</span></label>
+                        <select class="form-select" name="achievement_type[]" required>
+                            <option value="">请选择</option>
+                            <option value="论文">论文</option>
+                            <option value="项目">项目</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">时间 <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="achievement_date[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">排名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="achievement_ranking[]" required>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-success" onclick="addTeachingEntry()">添加记录</button>
+        </div>
 
-        <!-- 一次培训 -->
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="card-title mb-0">一次培训</h5>
+        <!-- 一项科研成果（可动态添加） -->
+        <div id="research-container">
+            <div class="card mb-4 research-entry">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">一项科研成果</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, 'research-entry')">删除</button>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">成果名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="research_achievement_name[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">成果类型 <span class="text-danger">*</span></label>
+                        <select class="form-select" name="research_type[]" required>
+                            <option value="">请选择</option>
+                            <option value="论文">论文</option>
+                            <option value="项目">项目</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">时间 <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="research_date[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">排名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="research_ranking[]" required>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">培训名称 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="training_name" id="training_name" required>
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-info" onclick="addResearchEntry()">添加记录</button>
+        </div>
+
+        <!-- 一项竞赛（可动态添加） -->
+        <div id="competition-container">
+            <div class="card mb-4 competition-entry">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">一项竞赛</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, 'competition-entry')">删除</button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">承办单位 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="training_organizer" id="training_organizer" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">培训时间 <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" name="training_date" id="training_date" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">培训地点 <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="training_location" id="training_location" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">培训内容简介 <span class="text-danger">*</span></label>
-                    <textarea class="form-control" name="training_description" id="training_description" required></textarea>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">竞赛名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="competition_name[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">承办单位 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="competition_organizer[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">竞赛类型 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="competition_type[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">时间 <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="competition_date[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">获奖等级 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="award_level[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学生姓名 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="student_names[]" placeholder="输入一个或多个学生姓名" required>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-warning" onclick="addCompetitionEntry()">添加记录</button>
+        </div>
+
+        <!-- 一次培训（可动态添加） -->
+        <div id="training-container">
+            <div class="card mb-4 training-entry">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">一次培训</h5>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, 'training-entry')">删除</button>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">培训名称 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="training_name[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">承办单位 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="training_organizer[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">培训时间 <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="training_date[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">培训地点 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="training_location[]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">培训内容简介 <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="training_description[]" required></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <button type="button" class="btn btn-secondary" onclick="addTrainingEntry()">添加记录</button>
         </div>
 
         <button type="submit" class="btn btn-primary">提交所有信息</button>
@@ -223,7 +254,68 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// 提取加载数据的逻辑到单独的函数
+// 动态回显多条数据的辅助函数
+function fillEntries(containerId, entryClass, dataList, fieldMap) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    dataList.forEach((data, idx) => {
+        // 构建每组输入区域
+        const div = document.createElement('div');
+        div.className = 'card mb-4 ' + entryClass;
+        let html = `<div class="card-header ${fieldMap.headerClass} d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">${fieldMap.title}</h5>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, '${entryClass}')">删除</button>
+        </div><div class="card-body">`;
+        fieldMap.fields.forEach(f => {
+            if (f.type === 'textarea') {
+                html += `<div class="mb-3"><label class="form-label">${f.label}</label><textarea class="form-control" name="${f.name}[]" required>${data[f.dataKey] || ''}</textarea></div>`;
+            } else if (f.type === 'select') {
+                html += `<div class="mb-3"><label class="form-label">${f.label}</label><select class="form-select" name="${f.name}[]" required>`;
+                f.options.forEach(opt => {
+                    html += `<option value="${opt.value}"${data[f.dataKey] == opt.value ? ' selected' : ''}>${opt.text}</option>`;
+                });
+                html += `</select></div>`;
+            } else {
+                html += `<div class="mb-3"><label class="form-label">${f.label}</label><input type="${f.type}" class="form-control" name="${f.name}[]" value="${data[f.dataKey] || ''}" required></div>`;
+            }
+        });
+        html += '</div>';
+        div.innerHTML = html;
+        container.appendChild(div);
+    });
+    // 若没有数据，保留一组空表单
+    if (dataList.length === 0) {
+        addEntry(containerId, entryClass, fieldMap);
+    }
+}
+// 动态添加一组空输入区域
+function addEntry(containerId, entryClass, fieldMap) {
+    const container = document.getElementById(containerId);
+    const div = document.createElement('div');
+    div.className = 'card mb-4 ' + entryClass;
+    let html = `<div class="card-header ${fieldMap.headerClass} d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">${fieldMap.title}</h5>
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this, '${entryClass}')">删除</button>
+    </div><div class="card-body">`;
+    fieldMap.fields.forEach(f => {
+        if (f.type === 'textarea') {
+            html += `<div class="mb-3"><label class="form-label">${f.label}</label><textarea class="form-control" name="${f.name}[]" required></textarea></div>`;
+        } else if (f.type === 'select') {
+            html += `<div class="mb-3"><label class="form-label">${f.label}</label><select class="form-select" name="${f.name}[]" required>`;
+            f.options.forEach(opt => {
+                html += `<option value="${opt.value}">${opt.text}</option>`;
+            });
+            html += `</select></div>`;
+        } else {
+            html += `<div class="mb-3"><label class="form-label">${f.label}</label><input type="${f.type}" class="form-control" name="${f.name}[]" required></div>`;
+        }
+    });
+    html += '</div>';
+    div.innerHTML = html;
+    container.appendChild(div);
+}
+
+// 重写 loadYearData 实现多条数据回显
 async function loadYearData(year) {
     try {
         const response = await fetch(`/api/five_one/${year}`);
@@ -231,75 +323,308 @@ async function loadYearData(year) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const result = await response.json();
-        console.log('API Response:', result); // 添加调试日志
-        
         if (result.success) {
             const data = result.data;
-            
-            // 如果是数组（特殊用户查看所有记录），不填充表单
-            if (Array.isArray(data)) {
-                // 清空表单
-                document.getElementById('fiveOneForm').reset();
-                document.getElementById('yearSelect').value = year; // 保持年份选择不变
-                return;
-            }
-            
-            // 填充图书信息
-            document.getElementById('book_title').value = data.book_title || '';
-            document.getElementById('book_number').value = data.book_number || '';
-            document.getElementById('publish_date').value = data.publish_date || '';
-            document.getElementById('publisher').value = data.publisher || '';
-            document.getElementById('author').value = data.author || '';
-            document.getElementById('has_notes').value = data.has_notes ? 'true' : 'false';
-            
-            // 填充教学成果
-            document.getElementById('teaching_achievement_name').value = data.teaching_achievement_name || '';
-            document.getElementById('achievement_type').value = data.achievement_type || '';
-            document.getElementById('achievement_date').value = data.achievement_date || '';
-            document.getElementById('achievement_ranking').value = data.achievement_ranking || '';
-            
-            // 填充科研成果
-            document.getElementById('research_achievement_name').value = data.research_achievement_name || '';
-            document.getElementById('research_type').value = data.research_type || '';
-            document.getElementById('research_date').value = data.research_date || '';
-            document.getElementById('research_ranking').value = data.research_ranking || '';
-            
-            // 填充竞赛信息
-            document.getElementById('competition_name').value = data.competition_name || '';
-            document.getElementById('competition_organizer').value = data.competition_organizer || '';
-            document.getElementById('competition_type').value = data.competition_type || '';
-            document.getElementById('competition_date').value = data.competition_date || '';
-            document.getElementById('award_level').value = data.award_level || '';
-            document.getElementById('student_names').value = data.student_names || '';
-            
-            // 填充培训信息
-            document.getElementById('training_name').value = data.training_name || '';
-            document.getElementById('training_organizer').value = data.training_organizer || '';
-            document.getElementById('training_date').value = data.training_date || '';
-            document.getElementById('training_location').value = data.training_location || '';
-            document.getElementById('training_description').value = data.training_description || '';
-            
+            // 一本书
+            fillEntries('books-container', 'book-entry', data.book_records || [], {
+                title: '一本书',
+                headerClass: 'bg-primary text-white',
+                fields: [
+                    {label: '书名', name: 'book_title', dataKey: 'book_title', type: 'text'},
+                    {label: '书号', name: 'book_number', dataKey: 'book_number', type: 'text'},
+                    {label: '出版日期', name: 'publish_date', dataKey: 'publish_date', type: 'date'},
+                    {label: '出版社', name: 'publisher', dataKey: 'publisher', type: 'text'},
+                    {label: '编著者', name: 'author', dataKey: 'author', type: 'text'},
+                    {label: '是否有笔记', name: 'has_notes', dataKey: 'has_notes', type: 'select', options: [
+                        {value: 'false', text: '否'},
+                        {value: 'true', text: '是'}
+                    ]}
+                ]
+            });
+            // 教研成果
+            fillEntries('teaching-container', 'teaching-entry', data.teaching_records || [], {
+                title: '一项教研成果',
+                headerClass: 'bg-success text-white',
+                fields: [
+                    {label: '成果名称', name: 'teaching_achievement_name', dataKey: 'achievement_name', type: 'text'},
+                    {label: '成果类型', name: 'achievement_type', dataKey: 'achievement_type', type: 'select', options: [
+                        {value: '', text: '请选择'},
+                        {value: '论文', text: '论文'},
+                        {value: '项目', text: '项目'}
+                    ]},
+                    {label: '时间', name: 'achievement_date', dataKey: 'achievement_date', type: 'date'},
+                    {label: '排名', name: 'achievement_ranking', dataKey: 'achievement_ranking', type: 'text'}
+                ]
+            });
+            // 科研成果
+            fillEntries('research-container', 'research-entry', data.research_records || [], {
+                title: '一项科研成果',
+                headerClass: 'bg-info text-white',
+                fields: [
+                    {label: '成果名称', name: 'research_achievement_name', dataKey: 'achievement_name', type: 'text'},
+                    {label: '成果类型', name: 'research_type', dataKey: 'research_type', type: 'select', options: [
+                        {value: '', text: '请选择'},
+                        {value: '论文', text: '论文'},
+                        {value: '项目', text: '项目'}
+                    ]},
+                    {label: '时间', name: 'research_date', dataKey: 'research_date', type: 'date'},
+                    {label: '排名', name: 'research_ranking', dataKey: 'research_ranking', type: 'text'}
+                ]
+            });
+            // 竞赛
+            fillEntries('competition-container', 'competition-entry', data.competition_records || [], {
+                title: '一项竞赛',
+                headerClass: 'bg-warning text-dark',
+                fields: [
+                    {label: '竞赛名称', name: 'competition_name', dataKey: 'competition_name', type: 'text'},
+                    {label: '承办单位', name: 'competition_organizer', dataKey: 'competition_organizer', type: 'text'},
+                    {label: '竞赛类型', name: 'competition_type', dataKey: 'competition_type', type: 'text'},
+                    {label: '时间', name: 'competition_date', dataKey: 'competition_date', type: 'date'},
+                    {label: '获奖等级', name: 'award_level', dataKey: 'award_level', type: 'text'},
+                    {label: '学生姓名', name: 'student_names', dataKey: 'student_names', type: 'text'}
+                ]
+            });
+            // 培训
+            fillEntries('training-container', 'training-entry', data.training_records || [], {
+                title: '一次培训',
+                headerClass: 'bg-secondary text-white',
+                fields: [
+                    {label: '培训名称', name: 'training_name', dataKey: 'training_name', type: 'text'},
+                    {label: '承办单位', name: 'training_organizer', dataKey: 'training_organizer', type: 'text'},
+                    {label: '培训时间', name: 'training_date', dataKey: 'training_date', type: 'date'},
+                    {label: '培训地点', name: 'training_location', dataKey: 'training_location', type: 'text'},
+                    {label: '培训内容简介', name: 'training_description', dataKey: 'training_description', type: 'textarea'}
+                ]
+            });
         } else {
-            // 如果没有找到数据，清空表单
-            document.getElementById('fiveOneForm').reset();
-            document.getElementById('yearSelect').value = year; // 保持年份选择不变
-            console.log('No data found message:', result.message); // 添加调试日志
-            alert(result.message || `${year}年暂无数据，您可以开始编辑`);
+            // 没有数据，清空所有输入区域并保留一组空表单
+            fillEntries('books-container', 'book-entry', [], {
+                title: '一本书', headerClass: 'bg-primary text-white', fields: [
+                    {label: '书名', name: 'book_title', dataKey: 'book_title', type: 'text'},
+                    {label: '书号', name: 'book_number', dataKey: 'book_number', type: 'text'},
+                    {label: '出版日期', name: 'publish_date', dataKey: 'publish_date', type: 'date'},
+                    {label: '出版社', name: 'publisher', dataKey: 'publisher', type: 'text'},
+                    {label: '编著者', name: 'author', dataKey: 'author', type: 'text'},
+                    {label: '是否有笔记', name: 'has_notes', dataKey: 'has_notes', type: 'select', options: [
+                        {value: 'false', text: '否'},
+                        {value: 'true', text: '是'}
+                    ]}
+                ]
+            });
+            fillEntries('teaching-container', 'teaching-entry', [], {
+                title: '一项教研成果', headerClass: 'bg-success text-white', fields: [
+                    {label: '成果名称', name: 'teaching_achievement_name', dataKey: 'achievement_name', type: 'text'},
+                    {label: '成果类型', name: 'achievement_type', dataKey: 'achievement_type', type: 'select', options: [
+                        {value: '', text: '请选择'},
+                        {value: '论文', text: '论文'},
+                        {value: '项目', text: '项目'}
+                    ]},
+                    {label: '时间', name: 'achievement_date', dataKey: 'achievement_date', type: 'date'},
+                    {label: '排名', name: 'achievement_ranking', dataKey: 'achievement_ranking', type: 'text'}
+                ]
+            });
+            fillEntries('research-container', 'research-entry', [], {
+                title: '一项科研成果', headerClass: 'bg-info text-white', fields: [
+                    {label: '成果名称', name: 'research_achievement_name', dataKey: 'achievement_name', type: 'text'},
+                    {label: '成果类型', name: 'research_type', dataKey: 'research_type', type: 'select', options: [
+                        {value: '', text: '请选择'},
+                        {value: '论文', text: '论文'},
+                        {value: '项目', text: '项目'}
+                    ]},
+                    {label: '时间', name: 'research_date', dataKey: 'research_date', type: 'date'},
+                    {label: '排名', name: 'research_ranking', dataKey: 'research_ranking', type: 'text'}
+                ]
+            });
+            fillEntries('competition-container', 'competition-entry', [], {
+                title: '一项竞赛', headerClass: 'bg-warning text-dark', fields: [
+                    {label: '竞赛名称', name: 'competition_name', dataKey: 'competition_name', type: 'text'},
+                    {label: '承办单位', name: 'competition_organizer', dataKey: 'competition_organizer', type: 'text'},
+                    {label: '竞赛类型', name: 'competition_type', dataKey: 'competition_type', type: 'text'},
+                    {label: '时间', name: 'competition_date', dataKey: 'competition_date', type: 'date'},
+                    {label: '获奖等级', name: 'award_level', dataKey: 'award_level', type: 'text'},
+                    {label: '学生姓名', name: 'student_names', dataKey: 'student_names', type: 'text'}
+                ]
+            });
+            fillEntries('training-container', 'training-entry', [], {
+                title: '一次培训', headerClass: 'bg-secondary text-white', fields: [
+                    {label: '培训名称', name: 'training_name', dataKey: 'training_name', type: 'text'},
+                    {label: '承办单位', name: 'training_organizer', dataKey: 'training_organizer', type: 'text'},
+                    {label: '培训时间', name: 'training_date', dataKey: 'training_date', type: 'date'},
+                    {label: '培训地点', name: 'training_location', dataKey: 'training_location', type: 'text'},
+                    {label: '培训内容简介', name: 'training_description', dataKey: 'training_description', type: 'textarea'}
+                ]
+            });
         }
     } catch (error) {
-        console.error('Error loading data:', error); // 添加错误日志
         alert('加载数据时发生错误，请稍后重试');
     }
 }
 
-// 年份选择改变时加载数据
-document.getElementById('yearSelect').addEventListener('change', function() {
-    const year = this.value;
-    if (!year) {
-        document.getElementById('fiveOneForm').reset();
-        return;
+function addBookEntry() {
+    const container = document.getElementById('books-container');
+    const entries = container.getElementsByClassName('book-entry');
+    const lastEntry = entries[entries.length - 1];
+    const newEntry = lastEntry.cloneNode(true);
+    Array.from(newEntry.querySelectorAll('input, select')).forEach(input => {
+        if (input.type === 'select-one') {
+            input.selectedIndex = 0;
+        } else if (input.tagName === 'TEXTAREA') {
+            input.value = '';
+        } else {
+            input.value = '';
+        }
+    });
+    container.appendChild(newEntry);
+}
+
+function addTeachingEntry() {
+    const container = document.getElementById('teaching-container');
+    const entries = container.getElementsByClassName('teaching-entry');
+    const lastEntry = entries[entries.length - 1];
+    const newEntry = lastEntry.cloneNode(true);
+    Array.from(newEntry.querySelectorAll('input, select')).forEach(input => {
+        if (input.type === 'select-one') {
+            input.selectedIndex = 0;
+        } else {
+            input.value = '';
+        }
+    });
+    container.appendChild(newEntry);
+}
+
+function addResearchEntry() {
+    const container = document.getElementById('research-container');
+    const entries = container.getElementsByClassName('research-entry');
+    const lastEntry = entries[entries.length - 1];
+    const newEntry = lastEntry.cloneNode(true);
+    Array.from(newEntry.querySelectorAll('input, select')).forEach(input => {
+        if (input.type === 'select-one') {
+            input.selectedIndex = 0;
+        } else {
+            input.value = '';
+        }
+    });
+    container.appendChild(newEntry);
+}
+
+function addCompetitionEntry() {
+    const container = document.getElementById('competition-container');
+    const entries = container.getElementsByClassName('competition-entry');
+    const lastEntry = entries[entries.length - 1];
+    const newEntry = lastEntry.cloneNode(true);
+    Array.from(newEntry.querySelectorAll('input, select')).forEach(input => {
+        if (input.type === 'select-one') {
+            input.selectedIndex = 0;
+        } else {
+            input.value = '';
+        }
+    });
+    container.appendChild(newEntry);
+}
+
+function addTrainingEntry() {
+    const container = document.getElementById('training-container');
+    const entries = container.getElementsByClassName('training-entry');
+    const lastEntry = entries[entries.length - 1];
+    const newEntry = lastEntry.cloneNode(true);
+    Array.from(newEntry.querySelectorAll('input, select, textarea')).forEach(input => {
+        if (input.type === 'select-one') {
+            input.selectedIndex = 0;
+        } else if (input.tagName === 'TEXTAREA') {
+            input.value = '';
+        } else {
+            input.value = '';
+        }
+    });
+    container.appendChild(newEntry);
+}
+
+function removeEntry(btn, entryClass) {
+    const entry = btn.closest('.' + entryClass);
+    const container = entry.parentElement;
+    // 至少保留一组（如需允许全部删除可去掉此判断）
+    if (container.getElementsByClassName(entryClass).length > 1) {
+        entry.remove();
     }
-    loadYearData(year);
-});
+}
+
+function validateFiveOneForm() {
+    // 一本书
+    const bookEntries = document.querySelectorAll('.book-entry');
+    for (let entry of bookEntries) {
+        const title = entry.querySelector('input[name="book_title[]"]').value.trim();
+        const number = entry.querySelector('input[name="book_number[]"]').value.trim();
+        const date = entry.querySelector('input[name="publish_date[]"]').value.trim();
+        const publisher = entry.querySelector('input[name="publisher[]"]').value.trim();
+        const author = entry.querySelector('input[name="author[]"]').value.trim();
+        // 只要有一个字段填写了，就必须全部填写
+        if (title || number || date || publisher || author) {
+            if (!(title && number && date && publisher && author)) {
+                alert('请完整填写每本书的所有字段');
+                return false;
+            }
+        }
+    }
+    // 教研成果
+    const teachingEntries = document.querySelectorAll('.teaching-entry');
+    for (let entry of teachingEntries) {
+        const name = entry.querySelector('input[name="teaching_achievement_name[]"]').value.trim();
+        const type = entry.querySelector('select[name="achievement_type[]"]').value.trim();
+        const date = entry.querySelector('input[name="achievement_date[]"]').value.trim();
+        const ranking = entry.querySelector('input[name="achievement_ranking[]"]').value.trim();
+        if (name || type || date || ranking) {
+            if (!(name && type && date && ranking)) {
+                alert('请完整填写每项教研成果的所有字段');
+                return false;
+            }
+        }
+    }
+    // 科研成果
+    const researchEntries = document.querySelectorAll('.research-entry');
+    for (let entry of researchEntries) {
+        const name = entry.querySelector('input[name="research_achievement_name[]"]').value.trim();
+        const type = entry.querySelector('select[name="research_type[]"]').value.trim();
+        const date = entry.querySelector('input[name="research_date[]"]').value.trim();
+        const ranking = entry.querySelector('input[name="research_ranking[]"]').value.trim();
+        if (name || type || date || ranking) {
+            if (!(name && type && date && ranking)) {
+                alert('请完整填写每项科研成果的所有字段');
+                return false;
+            }
+        }
+    }
+    // 竞赛
+    const competitionEntries = document.querySelectorAll('.competition-entry');
+    for (let entry of competitionEntries) {
+        const name = entry.querySelector('input[name="competition_name[]"]').value.trim();
+        const organizer = entry.querySelector('input[name="competition_organizer[]"]').value.trim();
+        const type = entry.querySelector('input[name="competition_type[]"]').value.trim();
+        const date = entry.querySelector('input[name="competition_date[]"]').value.trim();
+        const award = entry.querySelector('input[name="award_level[]"]').value.trim();
+        const students = entry.querySelector('input[name="student_names[]"]').value.trim();
+        if (name || organizer || type || date || award || students) {
+            if (!(name && organizer && type && date && award && students)) {
+                alert('请完整填写每项竞赛的所有字段');
+                return false;
+            }
+        }
+    }
+    // 培训
+    const trainingEntries = document.querySelectorAll('.training-entry');
+    for (let entry of trainingEntries) {
+        const name = entry.querySelector('input[name="training_name[]"]').value.trim();
+        const organizer = entry.querySelector('input[name="training_organizer[]"]').value.trim();
+        const date = entry.querySelector('input[name="training_date[]"]').value.trim();
+        const location = entry.querySelector('input[name="training_location[]"]').value.trim();
+        const desc = entry.querySelector('textarea[name="training_description[]"]').value.trim();
+        if (name || organizer || date || location || desc) {
+            if (!(name && organizer && date && location && desc)) {
+                alert('请完整填写每项培训的所有字段');
+                return false;
+            }
+        }
+    }
+    return true;
+}
 </script>
 {% endblock %} 

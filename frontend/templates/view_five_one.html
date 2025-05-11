@@ -21,18 +21,22 @@
             <h5 class="card-title mb-0">一本书</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            {% for book in record.book_records %}
+            <div class="row mb-2">
                 <div class="col-md-6">
-                    <p><strong>书名：</strong>{{ record.book_title }}</p>
-                    <p><strong>书号：</strong>{{ record.book_number }}</p>
-                    <p><strong>出版日期：</strong>{{ record.publish_date.strftime('%Y-%m-%d') if record.publish_date }}</p>
+                    <p><strong>书名：</strong>{{ book.book_title }}</p>
+                    <p><strong>书号：</strong>{{ book.book_number }}</p>
+                    <p><strong>出版日期：</strong>{{ book.publish_date }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>出版社：</strong>{{ record.publisher }}</p>
-                    <p><strong>编著者：</strong>{{ record.author }}</p>
-                    <p><strong>是否有笔记：</strong>{{ '是' if record.has_notes else '否' }}</p>
+                    <p><strong>出版社：</strong>{{ book.publisher }}</p>
+                    <p><strong>编著者：</strong>{{ book.author }}</p>
+                    <p><strong>是否有笔记：</strong>{{ '是' if book.has_notes else '否' }}</p>
                 </div>
             </div>
+            {% else %}
+            <p class="text-muted">暂无记录</p>
+            {% endfor %}
         </div>
     </div>
 
@@ -42,16 +46,20 @@
             <h5 class="card-title mb-0">一项教研成果</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            {% for t in record.teaching_records %}
+            <div class="row mb-2">
                 <div class="col-md-6">
-                    <p><strong>成果名称：</strong>{{ record.teaching_achievement_name }}</p>
-                    <p><strong>成果类型：</strong>{{ record.achievement_type }}</p>
+                    <p><strong>成果名称：</strong>{{ t.achievement_name }}</p>
+                    <p><strong>成果类型：</strong>{{ t.achievement_type }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>时间：</strong>{{ record.achievement_date.strftime('%Y-%m-%d') if record.achievement_date }}</p>
-                    <p><strong>排名：</strong>{{ record.achievement_ranking }}</p>
+                    <p><strong>时间：</strong>{{ t.achievement_date }}</p>
+                    <p><strong>排名：</strong>{{ t.achievement_ranking }}</p>
                 </div>
             </div>
+            {% else %}
+            <p class="text-muted">暂无记录</p>
+            {% endfor %}
         </div>
     </div>
 
@@ -61,16 +69,20 @@
             <h5 class="card-title mb-0">一项科研成果</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            {% for r in record.research_records %}
+            <div class="row mb-2">
                 <div class="col-md-6">
-                    <p><strong>成果名称：</strong>{{ record.research_achievement_name }}</p>
-                    <p><strong>成果类型：</strong>{{ record.research_type }}</p>
+                    <p><strong>成果名称：</strong>{{ r.achievement_name }}</p>
+                    <p><strong>成果类型：</strong>{{ r.research_type }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>时间：</strong>{{ record.research_date.strftime('%Y-%m-%d') if record.research_date }}</p>
-                    <p><strong>排名：</strong>{{ record.research_ranking }}</p>
+                    <p><strong>时间：</strong>{{ r.research_date }}</p>
+                    <p><strong>排名：</strong>{{ r.research_ranking }}</p>
                 </div>
             </div>
+            {% else %}
+            <p class="text-muted">暂无记录</p>
+            {% endfor %}
         </div>
     </div>
 
@@ -80,18 +92,22 @@
             <h5 class="card-title mb-0">一项竞赛</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            {% for c in record.competition_records %}
+            <div class="row mb-2">
                 <div class="col-md-6">
-                    <p><strong>竞赛名称：</strong>{{ record.competition_name }}</p>
-                    <p><strong>承办单位：</strong>{{ record.competition_organizer }}</p>
-                    <p><strong>竞赛类型：</strong>{{ record.competition_type }}</p>
+                    <p><strong>竞赛名称：</strong>{{ c.competition_name }}</p>
+                    <p><strong>承办单位：</strong>{{ c.competition_organizer }}</p>
+                    <p><strong>竞赛类型：</strong>{{ c.competition_type }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>时间：</strong>{{ record.competition_date.strftime('%Y-%m-%d') if record.competition_date }}</p>
-                    <p><strong>获奖等级：</strong>{{ record.award_level }}</p>
-                    <p><strong>学生姓名：</strong>{{ record.student_names }}</p>
+                    <p><strong>时间：</strong>{{ c.competition_date }}</p>
+                    <p><strong>获奖等级：</strong>{{ c.award_level }}</p>
+                    <p><strong>学生姓名：</strong>{{ c.student_names }}</p>
                 </div>
             </div>
+            {% else %}
+            <p class="text-muted">暂无记录</p>
+            {% endfor %}
         </div>
     </div>
 
@@ -101,17 +117,21 @@
             <h5 class="card-title mb-0">一次培训</h5>
         </div>
         <div class="card-body">
-            <div class="row">
+            {% for t in record.training_records %}
+            <div class="row mb-2">
                 <div class="col-md-6">
-                    <p><strong>培训名称：</strong>{{ record.training_name }}</p>
-                    <p><strong>承办单位：</strong>{{ record.training_organizer }}</p>
-                    <p><strong>培训时间：</strong>{{ record.training_date.strftime('%Y-%m-%d') if record.training_date }}</p>
+                    <p><strong>培训名称：</strong>{{ t.training_name }}</p>
+                    <p><strong>承办单位：</strong>{{ t.training_organizer }}</p>
+                    <p><strong>培训时间：</strong>{{ t.training_date }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>培训地点：</strong>{{ record.training_location }}</p>
-                    <p><strong>培训内容简介：</strong>{{ record.training_description }}</p>
+                    <p><strong>培训地点：</strong>{{ t.training_location }}</p>
+                    <p><strong>培训内容简介：</strong>{{ t.training_description }}</p>
                 </div>
             </div>
+            {% else %}
+            <p class="text-muted">暂无记录</p>
+            {% endfor %}
         </div>
     </div>
 

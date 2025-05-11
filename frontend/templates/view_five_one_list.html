@@ -36,11 +36,31 @@
                 {% for record in records %}
                 <tr>
                     <td>{{ teachers[record.teacher_id] }}</td>
-                    <td>{{ record.book_title }}</td>
-                    <td>{{ record.teaching_achievement_name }}</td>
-                    <td>{{ record.research_achievement_name }}</td>
-                    <td>{{ record.competition_name }}</td>
-                    <td>{{ record.training_name }}</td>
+                    <td>
+                        {% for book in record.book_records %}
+                            <div>{{ book.book_title }}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for t in record.teaching_records %}
+                            <div>{{ t.achievement_name }}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for r in record.research_records %}
+                            <div>{{ r.achievement_name }}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for c in record.competition_records %}
+                            <div>{{ c.competition_name }}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for t in record.training_records %}
+                            <div>{{ t.training_name }}</div>
+                        {% endfor %}
+                    </td>
                     <td>
                         <a href="{{ url_for('view_five_one', year=year, teacher_id=record.teacher_id) }}" class="btn btn-primary btn-sm">查看详情</a>
                     </td>

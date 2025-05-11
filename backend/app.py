@@ -10,7 +10,7 @@ import uuid
 from collections import defaultdict
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
-from models import User, db, Internship, GraduationProject, TeacherCourse, TeachingProject, EvaluationProject, ResearchPaper, InnovationProject, Competition, CollegeEvent, FiveOneMentor, File, FiveOneProject, Teacher, Course, ScientificProject, ScientificAward
+from models import User, db, Internship, GraduationProject, TeacherCourse, TeachingProject, EvaluationProject, ResearchPaper, InnovationProject, Competition, CollegeEvent, FiveOneMentor, File, FiveOneProject, Teacher, Course, ScientificProject, ScientificAward, BookRecord, TeachingRecord, ResearchRecord, CompetitionRecord, TrainingRecord
 import subprocess
 import shutil
 import platform
@@ -134,10 +134,13 @@ def profile():
             # 处理头像上传
             if 'photo' in request.files and request.files['photo'].filename:
                 photo = request.files['photo']
+                # 检查文件类型，确保只允许上传图片文件
+                if not allowed_file(photo.filename):
+                    return 'File type not allowed', 400
                 # 确保文件名安全
                 filename = secure_filename(photo.filename)
-                # 生成唯一的文件名
-                unique_filename = f"{current_user.id}_{int(time.time())}_{filename}"
+                # 强制指定文件后缀为 .jpg
+                unique_filename = f"{current_user.id}_{int(time.time())}.jpg"
                 # 保存文件
                 photo_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', unique_filename)
                 os.makedirs(os.path.dirname(photo_path), exist_ok=True)
@@ -753,133 +756,142 @@ def get_teacher_stats():
 @login_required
 def save_five_one():
     try:
-        # 获取表单数据
         year = request.form.get('year')
         if not year:
             flash('请选择年份', 'error')
             return redirect(url_for('five_one'))
-            
-        # 验证所有必填字段
-        required_fields = {
-            'book_title': '书名',
-            'book_number': '书号',
-            'publish_date': '出版日期',
-            'publisher': '出版社',
-            'author': '编著者',
-            'teaching_achievement_name': '教研成果名称',
-            'achievement_type': '教研成果类型',
-            'achievement_date': '教研成果时间',
-            'achievement_ranking': '教研成果排名',
-            'research_achievement_name': '科研成果名称',
-            'research_type': '科研成果类型',
-            'research_date': '科研成果时间',
-            'research_ranking': '科研成果排名',
-            'competition_name': '竞赛名称',
-            'competition_organizer': '竞赛承办单位',
-            'competition_type': '竞赛类型',
-            'competition_date': '竞赛时间',
-            'award_level': '获奖等级',
-            'student_names': '学生姓名',
-            'training_name': '培训名称',
-            'training_organizer': '培训承办单位',
-            'training_date': '培训时间',
-            'training_location': '培训地点',
-            'training_description': '培训内容简介'
-        }
-        
-        missing_fields = []
-        for field, field_name in required_fields.items():
-            if not request.form.get(field):
-                missing_fields.append(field_name)
-                
-        if missing_fields:
-            flash(f'以下字段不能为空：{", ".join(missing_fields)}', 'error')
-            return redirect(url_for('five_one'))
 
-        def parse_date(date_str):
-            try:
-                if date_str:
-                    return datetime.strptime(date_str, '%Y-%m-%d').date()
-                return None
-            except ValueError:
-                return None
-            
-        # 检查是否已存在该年份的记录
-        existing_record = FiveOneProject.query.filter_by(
-            year=year,
-            teacher_id=current_user.id
-        ).first()
-        
-        if existing_record:
-            # 更新现有记录
-            existing_record.book_title = request.form.get('book_title')
-            existing_record.book_number = request.form.get('book_number')
-            existing_record.publish_date = parse_date(request.form.get('publish_date'))
-            existing_record.publisher = request.form.get('publisher')
-            existing_record.author = request.form.get('author')
-            existing_record.has_notes = request.form.get('has_notes') == 'true'
-            
-            existing_record.teaching_achievement_name = request.form.get('teaching_achievement_name')
-            existing_record.achievement_type = request.form.get('achievement_type')
-            existing_record.achievement_date = parse_date(request.form.get('achievement_date'))
-            existing_record.achievement_ranking = request.form.get('achievement_ranking')
-            
-            existing_record.research_achievement_name = request.form.get('research_achievement_name')
-            existing_record.research_type = request.form.get('research_type')
-            existing_record.research_date = parse_date(request.form.get('research_date'))
-            existing_record.research_ranking = request.form.get('research_ranking')
-            
-            existing_record.competition_name = request.form.get('competition_name')
-            existing_record.competition_organizer = request.form.get('competition_organizer')
-            existing_record.competition_type = request.form.get('competition_type')
-            existing_record.competition_date = parse_date(request.form.get('competition_date'))
-            existing_record.award_level = request.form.get('award_level')
-            existing_record.student_names = request.form.get('student_names')
-            
-            existing_record.training_name = request.form.get('training_name')
-            existing_record.training_organizer = request.form.get('training_organizer')
-            existing_record.training_date = parse_date(request.form.get('training_date'))
-            existing_record.training_location = request.form.get('training_location')
-            existing_record.training_description = request.form.get('training_description')
-            
-            existing_record.updated_at = datetime.utcnow()
-        else:
-            # 创建新记录
-            new_record = FiveOneProject(
-                year=year,
-                teacher_id=current_user.id,
-                book_title=request.form.get('book_title'),
-                book_number=request.form.get('book_number'),
-                publish_date=parse_date(request.form.get('publish_date')),
-                publisher=request.form.get('publisher'),
-                author=request.form.get('author'),
-                has_notes=request.form.get('has_notes') == 'true',
-                teaching_achievement_name=request.form.get('teaching_achievement_name'),
-                achievement_type=request.form.get('achievement_type'),
-                achievement_date=parse_date(request.form.get('achievement_date')),
-                achievement_ranking=request.form.get('achievement_ranking'),
-                research_achievement_name=request.form.get('research_achievement_name'),
-                research_type=request.form.get('research_type'),
-                research_date=parse_date(request.form.get('research_date')),
-                research_ranking=request.form.get('research_ranking'),
-                competition_name=request.form.get('competition_name'),
-                competition_organizer=request.form.get('competition_organizer'),
-                competition_type=request.form.get('competition_type'),
-                competition_date=parse_date(request.form.get('competition_date')),
-                award_level=request.form.get('award_level'),
-                student_names=request.form.get('student_names'),
-                training_name=request.form.get('training_name'),
-                training_organizer=request.form.get('training_organizer'),
-                training_date=parse_date(request.form.get('training_date')),
-                training_location=request.form.get('training_location'),
-                training_description=request.form.get('training_description')
-            )
-            db.session.add(new_record)
-            
+        # 一本书
+        book_titles = request.form.getlist('book_title[]')
+        book_numbers = request.form.getlist('book_number[]')
+        publish_dates = request.form.getlist('publish_date[]')
+        publishers = request.form.getlist('publisher[]')
+        authors = request.form.getlist('author[]')
+        has_notes_list = request.form.getlist('has_notes[]')
+        # 教研成果
+        teaching_names = request.form.getlist('teaching_achievement_name[]')
+        achievement_types = request.form.getlist('achievement_type[]')
+        achievement_dates = request.form.getlist('achievement_date[]')
+        achievement_rankings = request.form.getlist('achievement_ranking[]')
+        # 科研成果
+        research_names = request.form.getlist('research_achievement_name[]')
+        research_types = request.form.getlist('research_type[]')
+        research_dates = request.form.getlist('research_date[]')
+        research_rankings = request.form.getlist('research_ranking[]')
+        # 竞赛
+        competition_names = request.form.getlist('competition_name[]')
+        competition_organizers = request.form.getlist('competition_organizer[]')
+        competition_types = request.form.getlist('competition_type[]')
+        competition_dates = request.form.getlist('competition_date[]')
+        award_levels = request.form.getlist('award_level[]')
+        student_names_list = request.form.getlist('student_names[]')
+        # 培训
+        training_names = request.form.getlist('training_name[]')
+        training_organizers = request.form.getlist('training_organizer[]')
+        training_dates = request.form.getlist('training_date[]')
+        training_locations = request.form.getlist('training_location[]')
+        training_descriptions = request.form.getlist('training_description[]')
+
+        # 校验每一项：只要有一项填写就必须全部填写
+        for i in range(len(book_titles)):
+            if book_titles[i] or book_numbers[i] or publish_dates[i] or publishers[i] or authors[i]:
+                if not (book_titles[i] and book_numbers[i] and publish_dates[i] and publishers[i] and authors[i]):
+                    flash('请完整填写每本书的所有字段', 'error')
+                    return redirect(url_for('five_one'))
+        for i in range(len(teaching_names)):
+            if teaching_names[i] or achievement_types[i] or achievement_dates[i] or achievement_rankings[i]:
+                if not (teaching_names[i] and achievement_types[i] and achievement_dates[i] and achievement_rankings[i]):
+                    flash('请完整填写每项教研成果的所有字段', 'error')
+                    return redirect(url_for('five_one'))
+        for i in range(len(research_names)):
+            if research_names[i] or research_types[i] or research_dates[i] or research_rankings[i]:
+                if not (research_names[i] and research_types[i] and research_dates[i] and research_rankings[i]):
+                    flash('请完整填写每项科研成果的所有字段', 'error')
+                    return redirect(url_for('five_one'))
+        for i in range(len(competition_names)):
+            if competition_names[i] or competition_organizers[i] or competition_types[i] or competition_dates[i] or award_levels[i] or student_names_list[i]:
+                if not (competition_names[i] and competition_organizers[i] and competition_types[i] and competition_dates[i] and award_levels[i] and student_names_list[i]):
+                    flash('请完整填写每项竞赛的所有字段', 'error')
+                    return redirect(url_for('five_one'))
+        for i in range(len(training_names)):
+            if training_names[i] or training_organizers[i] or training_dates[i] or training_locations[i] or training_descriptions[i]:
+                if not (training_names[i] and training_organizers[i] and training_dates[i] and training_locations[i] and training_descriptions[i]):
+                    flash('请完整填写每项培训的所有字段', 'error')
+                    return redirect(url_for('five_one'))
+
+        # 查找或创建 FiveOneProject
+        project = FiveOneProject.query.filter_by(year=year, teacher_id=current_user.id).first()
+        if not project:
+            project = FiveOneProject(year=year, teacher_id=current_user.id)
+            db.session.add(project)
+            db.session.flush()  # 获取project.id
+
+        # 删除原有子记录
+        BookRecord.query.filter_by(project_id=project.id).delete()
+        TeachingRecord.query.filter_by(project_id=project.id).delete()
+        ResearchRecord.query.filter_by(project_id=project.id).delete()
+        CompetitionRecord.query.filter_by(project_id=project.id).delete()
+        TrainingRecord.query.filter_by(project_id=project.id).delete()
+
+        # 一本书
+        for i in range(len(book_titles)):
+            if book_titles[i] and book_numbers[i] and publish_dates[i] and publishers[i] and authors[i]:
+                db.session.add(BookRecord(
+                    project_id=project.id,
+                    book_title=book_titles[i],
+                    book_number=book_numbers[i],
+                    publish_date=datetime.strptime(publish_dates[i], '%Y-%m-%d'),
+                    publisher=publishers[i],
+                    author=authors[i],
+                    has_notes=(has_notes_list[i] == 'true')
+                ))
+        # 教研成果
+        for i in range(len(teaching_names)):
+            if teaching_names[i] and achievement_types[i] and achievement_dates[i] and achievement_rankings[i]:
+                db.session.add(TeachingRecord(
+                    project_id=project.id,
+                    achievement_name=teaching_names[i],
+                    achievement_type=achievement_types[i],
+                    achievement_date=datetime.strptime(achievement_dates[i], '%Y-%m-%d'),
+                    achievement_ranking=achievement_rankings[i]
+                ))
+        # 科研成果
+        for i in range(len(research_names)):
+            if research_names[i] and research_types[i] and research_dates[i] and research_rankings[i]:
+                db.session.add(ResearchRecord(
+                    project_id=project.id,
+                    achievement_name=research_names[i],
+                    research_type=research_types[i],
+                    research_date=datetime.strptime(research_dates[i], '%Y-%m-%d'),
+                    research_ranking=research_rankings[i]
+                ))
+        # 竞赛
+        for i in range(len(competition_names)):
+            if competition_names[i] and competition_organizers[i] and competition_types[i] and competition_dates[i] and award_levels[i] and student_names_list[i]:
+                db.session.add(CompetitionRecord(
+                    project_id=project.id,
+                    competition_name=competition_names[i],
+                    competition_organizer=competition_organizers[i],
+                    competition_type=competition_types[i],
+                    competition_date=datetime.strptime(competition_dates[i], '%Y-%m-%d'),
+                    award_level=award_levels[i],
+                    student_names=student_names_list[i]
+                ))
+        # 培训
+        for i in range(len(training_names)):
+            if training_names[i] and training_organizers[i] and training_dates[i] and training_locations[i] and training_descriptions[i]:
+                db.session.add(TrainingRecord(
+                    project_id=project.id,
+                    training_name=training_names[i],
+                    training_organizer=training_organizers[i],
+                    training_date=datetime.strptime(training_dates[i], '%Y-%m-%d'),
+                    training_location=training_locations[i],
+                    training_description=training_descriptions[i]
+                ))
+
         db.session.commit()
         flash('信息保存成功', 'success')
         return redirect(url_for('five_one'))
-        
     except Exception as e:
         db.session.rollback()
         flash(f'保存失败：{str(e)}', 'error')
@@ -890,7 +902,7 @@ def can_view_all_five_one():
     special_users = ['张艳鹏', '王鹏']
     return current_user.name in special_users
 
-@app.route('/api/five_one/<int:year>')
+@app.route('/api/five_one/<int:year>', methods=['GET'])
 @login_required
 def get_five_one_by_year(year):
     try:
@@ -903,7 +915,7 @@ def get_five_one_by_year(year):
         if can_view_all_five_one():
             if teacher_id:
                 # 如果提供了teacher_id，查询特定教师的记录
-                record = FiveOneProject.query.filter_by(
+                project = FiveOneProject.query.filter_by(
                     year=year,
                     teacher_id=teacher_id
                 ).first()
@@ -911,127 +923,201 @@ def get_five_one_by_year(year):
                 teacher_name = teacher.name if teacher else "未知教师"
             else:
                 # 如果没有提供teacher_id，返回所有教师的记录列表
-                records = FiveOneProject.query.filter_by(year=year).all()
+                projects = FiveOneProject.query.filter_by(year=year).all()
                 return jsonify({
                     'success': True,
                     'data': [{
-                        'teacher_id': record.teacher_id,
-                        'teacher_name': User.query.get(record.teacher_id).name,
-                        'book_title': record.book_title,
-                        'book_number': record.book_number,
-                        'publish_date': record.publish_date.strftime('%Y-%m-%d') if record.publish_date else '',
-                        'publisher': record.publisher,
-                        'author': record.author,
-                        'has_notes': record.has_notes,
-                        'teaching_achievement_name': record.teaching_achievement_name,
-                        'achievement_type': record.achievement_type,
-                        'achievement_date': record.achievement_date.strftime('%Y-%m-%d') if record.achievement_date else '',
-                        'achievement_ranking': record.achievement_ranking,
-                        'research_achievement_name': record.research_achievement_name,
-                        'research_type': record.research_type,
-                        'research_date': record.research_date.strftime('%Y-%m-%d') if record.research_date else '',
-                        'research_ranking': record.research_ranking,
-                        'competition_name': record.competition_name,
-                        'competition_organizer': record.competition_organizer,
-                        'competition_type': record.competition_type,
-                        'competition_date': record.competition_date.strftime('%Y-%m-%d') if record.competition_date else '',
-                        'award_level': record.award_level,
-                        'student_names': record.student_names,
-                        'training_name': record.training_name,
-                        'training_organizer': record.training_organizer,
-                        'training_date': record.training_date.strftime('%Y-%m-%d') if record.training_date else '',
-                        'training_location': record.training_location,
-                        'training_description': record.training_description
-                    } for record in records]
+                        'teacher_id': project.teacher_id,
+                        'teacher_name': User.query.get(project.teacher_id).name,
+                        'book_records': [record.to_dict() for record in project.book_records],
+                        'teaching_records': [record.to_dict() for record in project.teaching_records],
+                        'research_records': [record.to_dict() for record in project.research_records],
+                        'competition_records': [record.to_dict() for record in project.competition_records],
+                        'training_records': [record.to_dict() for record in project.training_records]
+                    } for project in projects]
                 })
         else:
             # 普通用户只能查看自己的记录
-            record = FiveOneProject.query.filter_by(
+            project = FiveOneProject.query.filter_by(
                 year=year,
                 teacher_id=current_user.id
             ).first()
             teacher_name = current_user.name
 
-        if not record:
+        if not project:
             return jsonify({
                 'success': False,
                 'message': f'{teacher_name}还未编辑{year}年信息'
             })
             
-        # 转换日期为字符串格式
         return jsonify({
             'success': True,
             'data': {
-                'teacher_id': record.teacher_id,
+                'teacher_id': project.teacher_id,
                 'teacher_name': teacher_name,
-                'book_title': record.book_title,
-                'book_number': record.book_number,
-                'publish_date': record.publish_date.strftime('%Y-%m-%d') if record.publish_date else '',
-                'publisher': record.publisher,
-                'author': record.author,
-                'has_notes': record.has_notes,
-                'teaching_achievement_name': record.teaching_achievement_name,
-                'achievement_type': record.achievement_type,
-                'achievement_date': record.achievement_date.strftime('%Y-%m-%d') if record.achievement_date else '',
-                'achievement_ranking': record.achievement_ranking,
-                'research_achievement_name': record.research_achievement_name,
-                'research_type': record.research_type,
-                'research_date': record.research_date.strftime('%Y-%m-%d') if record.research_date else '',
-                'research_ranking': record.research_ranking,
-                'competition_name': record.competition_name,
-                'competition_organizer': record.competition_organizer,
-                'competition_type': record.competition_type,
-                'competition_date': record.competition_date.strftime('%Y-%m-%d') if record.competition_date else '',
-                'award_level': record.award_level,
-                'student_names': record.student_names,
-                'training_name': record.training_name,
-                'training_organizer': record.training_organizer,
-                'training_date': record.training_date.strftime('%Y-%m-%d') if record.training_date else '',
-                'training_location': record.training_location,
-                'training_description': record.training_description
+                'book_records': [record.to_dict() for record in project.book_records],
+                'teaching_records': [record.to_dict() for record in project.teaching_records],
+                'research_records': [record.to_dict() for record in project.research_records],
+                'competition_records': [record.to_dict() for record in project.competition_records],
+                'training_records': [record.to_dict() for record in project.training_records]
             }
         })
     except Exception as e:
-        print(f"Error in get_five_one_by_year: {str(e)}")  # 添加错误日志
+        print(f"Error in get_five_one_by_year: {str(e)}")
         return jsonify({
             'success': False,
             'message': f'获取数据时发生错误：{str(e)}'
+        })
+
+@app.route('/api/five_one/records/<record_type>', methods=['POST'])
+@login_required
+def add_five_one_record(record_type):
+    try:
+        year = request.form.get('year')
+        if not year:
+            return jsonify({'success': False, 'message': '请选择年份'})
+
+        # 获取或创建项目记录
+        project = FiveOneProject.query.filter_by(
+            year=year,
+            teacher_id=current_user.id
+        ).first()
+        
+        if not project:
+            project = FiveOneProject(year=year, teacher_id=current_user.id)
+            db.session.add(project)
+            db.session.flush()  # 获取project.id
+
+        # 根据记录类型创建相应的记录
+        if record_type == 'book':
+            record = BookRecord(
+                project_id=project.id,
+                book_title=request.form.get('book_title'),
+                book_number=request.form.get('book_number'),
+                publish_date=datetime.strptime(request.form.get('publish_date'), '%Y-%m-%d').date() if request.form.get('publish_date') else None,
+                publisher=request.form.get('publisher'),
+                author=request.form.get('author'),
+                has_notes=request.form.get('has_notes') == 'true'
+            )
+        elif record_type == 'teaching':
+            record = TeachingRecord(
+                project_id=project.id,
+                achievement_name=request.form.get('achievement_name'),
+                achievement_type=request.form.get('achievement_type'),
+                achievement_date=datetime.strptime(request.form.get('achievement_date'), '%Y-%m-%d').date() if request.form.get('achievement_date') else None,
+                achievement_ranking=request.form.get('achievement_ranking')
+            )
+        elif record_type == 'research':
+            record = ResearchRecord(
+                project_id=project.id,
+                achievement_name=request.form.get('achievement_name'),
+                research_type=request.form.get('research_type'),
+                research_date=datetime.strptime(request.form.get('research_date'), '%Y-%m-%d').date() if request.form.get('research_date') else None,
+                research_ranking=request.form.get('research_ranking')
+            )
+        elif record_type == 'competition':
+            record = CompetitionRecord(
+                project_id=project.id,
+                competition_name=request.form.get('competition_name'),
+                competition_organizer=request.form.get('competition_organizer'),
+                competition_type=request.form.get('competition_type'),
+                competition_date=datetime.strptime(request.form.get('competition_date'), '%Y-%m-%d').date() if request.form.get('competition_date') else None,
+                award_level=request.form.get('award_level'),
+                student_names=request.form.get('student_names')
+            )
+        elif record_type == 'training':
+            record = TrainingRecord(
+                project_id=project.id,
+                training_name=request.form.get('training_name'),
+                training_organizer=request.form.get('training_organizer'),
+                training_date=datetime.strptime(request.form.get('training_date'), '%Y-%m-%d').date() if request.form.get('training_date') else None,
+                training_location=request.form.get('training_location'),
+                training_description=request.form.get('training_description')
+            )
+        else:
+            return jsonify({'success': False, 'message': '无效的记录类型'})
+
+        db.session.add(record)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': '添加成功',
+            'data': record.to_dict()
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'添加失败：{str(e)}'
+        })
+
+@app.route('/api/five_one/records/<record_type>/<int:record_id>', methods=['DELETE'])
+@login_required
+def delete_five_one_record(record_type, record_id):
+    try:
+        # 根据记录类型获取相应的模型
+        model_map = {
+            'book': BookRecord,
+            'teaching': TeachingRecord,
+            'research': ResearchRecord,
+            'competition': CompetitionRecord,
+            'training': TrainingRecord
+        }
+        
+        if record_type not in model_map:
+            return jsonify({'success': False, 'message': '无效的记录类型'})
+            
+        record = model_map[record_type].query.get_or_404(record_id)
+        
+        # 检查权限
+        if record.project.teacher_id != current_user.id and not can_view_all_five_one():
+            return jsonify({'success': False, 'message': '没有权限删除此记录'})
+            
+        db.session.delete(record)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': '删除成功'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'删除失败：{str(e)}'
         })
 
 @app.route('/view_five_one/<int:year>')
 @login_required
 def view_five_one(year):
     try:
-        # 转换year为整数以确保类型匹配
         year = int(year)
-        
-        # 获取要查看的教师ID（如果有）
         teacher_id = request.args.get('teacher_id', type=int)
-        
         if can_view_all_five_one():
             if teacher_id:
-                # 查看特定教师的记录
-                record = FiveOneProject.query.filter_by(
-                    year=year,
-                    teacher_id=teacher_id
-                ).first()
+                record = FiveOneProject.query.filter_by(year=year, teacher_id=teacher_id).first()
             else:
-                # 显示所有教师的记录列表
                 records = FiveOneProject.query.filter_by(year=year).all()
                 teachers = {r.teacher_id: User.query.get(r.teacher_id).name for r in records}
-                return render_template('view_five_one_list.html', records=records, teachers=teachers, year=year)
+                # 组装每个教师的所有五个一工程子项为列表
+                record_list = []
+                for r in records:
+                    record_list.append({
+                        'teacher_id': r.teacher_id,
+                        'book_records': [b.to_dict() for b in r.book_records],
+                        'teaching_records': [t.to_dict() for t in r.teaching_records],
+                        'research_records': [t.to_dict() for t in r.research_records],
+                        'competition_records': [t.to_dict() for t in r.competition_records],
+                        'training_records': [t.to_dict() for t in r.training_records],
+                    })
+                return render_template('view_five_one_list.html', records=record_list, teachers=teachers, year=year)
         else:
-            # 普通用户只能查看自己的记录
-            record = FiveOneProject.query.filter_by(
-                year=year,
-                teacher_id=current_user.id
-            ).first()
-        
+            record = FiveOneProject.query.filter_by(year=year, teacher_id=current_user.id).first()
         if not record:
             teacher_name = User.query.get(teacher_id).name if teacher_id else current_user.name
             flash(f'{teacher_name}还未编辑{year}年信息', 'info')
             return redirect(url_for('five_one'))
-            
         return render_template('view_five_one.html', record=record)
     except Exception as e:
         flash(f'获取数据时发生错误：{str(e)}', 'error')

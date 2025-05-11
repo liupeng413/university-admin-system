@@ -482,80 +482,66 @@ class FiveOneProject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     year = db.Column(db.Integer, nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    # 一本书
-    book_title = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联关系
+    teacher = db.relationship('User', backref='five_one_projects')
+    book_records = db.relationship('BookRecord', backref='project', cascade='all, delete-orphan')
+    teaching_records = db.relationship('TeachingRecord', backref='project', cascade='all, delete-orphan')
+    research_records = db.relationship('ResearchRecord', backref='project', cascade='all, delete-orphan')
+    competition_records = db.relationship('CompetitionRecord', backref='project', cascade='all, delete-orphan')
+    training_records = db.relationship('TrainingRecord', backref='project', cascade='all, delete-orphan')
+
+class BookRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
+    book_title = db.Column(db.String(200), nullable=False)
     book_number = db.Column(db.String(50))
     publish_date = db.Column(db.Date)
     publisher = db.Column(db.String(100))
     author = db.Column(db.String(100))
     has_notes = db.Column(db.Boolean, default=False)
-    
-    # 一项教研成果
-    teaching_achievement_name = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class TeachingRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
+    achievement_name = db.Column(db.String(200), nullable=False)
     achievement_type = db.Column(db.String(50))
     achievement_date = db.Column(db.Date)
     achievement_ranking = db.Column(db.String(50))
-    
-    # 一项科研成果
-    research_achievement_name = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ResearchRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
+    achievement_name = db.Column(db.String(200), nullable=False)
     research_type = db.Column(db.String(50))
     research_date = db.Column(db.Date)
     research_ranking = db.Column(db.String(50))
-    
-    # 一项竞赛
-    competition_name = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class CompetitionRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
+    competition_name = db.Column(db.String(200), nullable=False)
     competition_organizer = db.Column(db.String(100))
     competition_type = db.Column(db.String(50))
     competition_date = db.Column(db.Date)
     award_level = db.Column(db.String(50))
-    student_names = db.Column(db.String(500))
-    
-    # 一次培训
-    training_name = db.Column(db.String(255))
+    student_names = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class TrainingRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
+    training_name = db.Column(db.String(200), nullable=False)
     training_organizer = db.Column(db.String(100))
     training_date = db.Column(db.Date)
     training_location = db.Column(db.String(100))
     training_description = db.Column(db.Text)
-    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    teacher = db.relationship('User', backref=db.backref('five_one_projects', lazy=True))
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'year': self.year,
-            'teacher_id': self.teacher_id,
-            'book_title': self.book_title,
-            'book_number': self.book_number,
-            'publish_date': self.publish_date.strftime('%Y-%m-%d') if self.publish_date else None,
-            'publisher': self.publisher,
-            'author': self.author,
-            'has_notes': self.has_notes,
-            'teaching_achievement_name': self.teaching_achievement_name,
-            'achievement_type': self.achievement_type,
-            'achievement_date': self.achievement_date.strftime('%Y-%m-%d') if self.achievement_date else None,
-            'achievement_ranking': self.achievement_ranking,
-            'research_achievement_name': self.research_achievement_name,
-            'research_type': self.research_type,
-            'research_date': self.research_date.strftime('%Y-%m-%d') if self.research_date else None,
-            'research_ranking': self.research_ranking,
-            'competition_name': self.competition_name,
-            'competition_organizer': self.competition_organizer,
-            'competition_type': self.competition_type,
-            'competition_date': self.competition_date.strftime('%Y-%m-%d') if self.competition_date else None,
-            'award_level': self.award_level,
-            'student_names': self.student_names,
-            'training_name': self.training_name,
-            'training_organizer': self.training_organizer,
-            'training_date': self.training_date.strftime('%Y-%m-%d') if self.training_date else None,
-            'training_location': self.training_location,
-            'training_description': self.training_description,
-            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
-            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None
-        } 
 
 class Teacher(db.Model):
     """教师信息模型"""
