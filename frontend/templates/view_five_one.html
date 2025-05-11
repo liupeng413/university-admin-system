@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">五个一工程 - {{ record.year }}年</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- 一本书 -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">一本书</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>书名：</strong>{{ record.book_title }}</p>
+                    <p><strong>书号：</strong>{{ record.book_number }}</p>
+                    <p><strong>出版日期：</strong>{{ record.publish_date.strftime('%Y-%m-%d') if record.publish_date }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>出版社：</strong>{{ record.publisher }}</p>
+                    <p><strong>编著者：</strong>{{ record.author }}</p>
+                    <p><strong>是否有笔记：</strong>{{ '是' if record.has_notes else '否' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一项教研成果 -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="card-title mb-0">一项教研成果</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>成果名称：</strong>{{ record.teaching_achievement_name }}</p>
+                    <p><strong>成果类型：</strong>{{ record.achievement_type }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>时间：</strong>{{ record.achievement_date.strftime('%Y-%m-%d') if record.achievement_date }}</p>
+                    <p><strong>排名：</strong>{{ record.achievement_ranking }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一项科研成果 -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0">一项科研成果</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>成果名称：</strong>{{ record.research_achievement_name }}</p>
+                    <p><strong>成果类型：</strong>{{ record.research_type }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>时间：</strong>{{ record.research_date.strftime('%Y-%m-%d') if record.research_date }}</p>
+                    <p><strong>排名：</strong>{{ record.research_ranking }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一项竞赛 -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0">一项竞赛</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>竞赛名称：</strong>{{ record.competition_name }}</p>
+                    <p><strong>承办单位：</strong>{{ record.competition_organizer }}</p>
+                    <p><strong>竞赛类型：</strong>{{ record.competition_type }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>时间：</strong>{{ record.competition_date.strftime('%Y-%m-%d') if record.competition_date }}</p>
+                    <p><strong>获奖等级：</strong>{{ record.award_level }}</p>
+                    <p><strong>学生姓名：</strong>{{ record.student_names }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 一次培训 -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0">一次培训</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>培训名称：</strong>{{ record.training_name }}</p>
+                    <p><strong>承办单位：</strong>{{ record.training_organizer }}</p>
+                    <p><strong>培训时间：</strong>{{ record.training_date.strftime('%Y-%m-%d') if record.training_date }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>培训地点：</strong>{{ record.training_location }}</p>
+                    <p><strong>培训内容简介：</strong>{{ record.training_description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('five_one') }}" class="btn btn-primary">返回编辑</a>
+    </div>
+</div>
+{% endblock %} 

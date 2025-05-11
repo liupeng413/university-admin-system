@@ -1,197 +1,63 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% macro format_date(date) %}
-    {% if date %}
-        {{ date.strftime('%Y-%m-%d') }}
-    {% else %}
-        待添加
-    {% endif %}
-{% endmacro %}
-
-{% macro format_value(value) %}
-    {% if value %}
-        {{ value }}
-    {% else %}
-        待添加
-    {% endif %}
-{% endmacro %}
-
-<div class="container">
+<div class="container mt-4">
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="mb-0 text-primary-color">{{ teacher.name }}教师的个人信息</h2>
-            {% if current_user.is_admin %}
-            <a href="{{ url_for('edit_teacher', teacher_id=teacher.id) }}" class="btn btn-outline-danger">
-                <i class="fas fa-edit"></i> 编辑信息
-            </a>
-            {% endif %}
-        </div>
         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">教师详细信息</h5>
+                <a href="{{ url_for('faculty_team') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> 返回列表
+                </a>
+            </div>
+
             <div class="row">
-                <div class="col-md-9">
-                    <div class="info-group mb-4">
-                        <h5 class="section-title">基本信息</h5>
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="30%" class="text-muted">工号：</th>
-                                    <td>{{ format_value(teacher.employee_number) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">姓名：</th>
-                                    <td>{{ format_value(teacher.name) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">性别：</th>
-                                    <td>{{ format_value(teacher.gender) }}</td>
-                                </tr>
-                                <tr>
-                                    <th>民族</th>
-                                    <td>{{ format_value(teacher.ethnicity) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">政治面貌：</th>
-                                    <td>{{ format_value(teacher.political_status) }}</td>
-                                </tr>
-                                {% if teacher.political_status == '中共党员' %}
-                                <tr>
-                                    <th class="text-muted">入党时间：</th>
-                                    <td>{{ format_date(teacher.party_join_date) }}</td>
-                                </tr>
-                                {% endif %}
-                                <tr>
-                                    <th class="text-muted">籍贯：</th>
-                                    <td>{{ format_value(teacher.hometown) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">身份证号：</th>
-                                    <td>{{ format_value(teacher.id_number) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">出生日期：</th>
-                                    <td>{{ format_date(teacher.birth_date) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">年龄：</th>
-                                    <td>{% if teacher.birth_date %}{{ teacher.age }}岁{% else %}待添加{% endif %}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">入校时间：</th>
-                                    <td>{{ format_date(teacher.work_start_date) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">参加工作时间：</th>
-                                    <td>{{ format_date(teacher.career_start_date) }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="info-group mb-4">
-                        <h5 class="section-title">工作信息</h5>
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th class="text-muted">最高级职称：</th>
-                                    <td>{{ format_value(teacher.highest_title) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">获得最高级职称时间：</th>
-                                    <td>{{ format_date(teacher.highest_title_date) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">所属专业：</th>
-                                    <td>{{ format_value(teacher.major) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">职称：</th>
-                                    <td>{{ format_value(teacher.title) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">职务：</th>
-                                    <td>{{ format_value(teacher.position) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">部门：</th>
-                                    <td>{{ format_value(teacher.department) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">所属教研室：</th>
-                                    <td>{{ format_value(teacher.teaching_group) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">是否双师：</th>
-                                    <td>{{ format_value(teacher.is_dual_teacher) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">研究方向：</th>
-                                    <td>{{ format_value(teacher.research_direction) }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="info-group mb-4">
-                        <h5 class="section-title">联系信息</h5>
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="30%" class="text-muted">家庭住址：</th>
-                                    <td>{{ format_value(teacher.address) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">联系电话：</th>
-                                    <td>{{ format_value(teacher.phone) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">电子邮件：</th>
-                                    <td>{{ format_value(teacher.email) }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="info-group mb-4">
-                        <h5 class="section-title">教育背景</h5>
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="30%" class="text-muted">学历：</th>
-                                    <td>{{ format_value(teacher.education_level) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">获得学历时间：</th>
-                                    <td>{{ format_date(teacher.education_date) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">学位：</th>
-                                    <td>{{ format_value(teacher.degree) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">获得学位时间：</th>
-                                    <td>{{ format_date(teacher.degree_date) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">本科毕业学校：</th>
-                                    <td>{{ format_value(teacher.bachelor_school) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">硕士毕业学校：</th>
-                                    <td>{{ format_value(teacher.master_school) }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-muted">博士毕业学校：</th>
-                                    <td>{{ format_value(teacher.phd_school) }}</td>
-                                </tr>
-                            </table>
-                        </div>
+                <!-- 基本信息 -->
+                <div class="col-md-6">
+                    <h6 class="border-bottom pb-2 mb-3">基本信息</h6>
+                    <div class="mb-3">
+                        <p><strong>工号：</strong>{{ teacher.employee_number }}</p>
+                        <p><strong>姓名：</strong>{{ teacher.name }}</p>
+                        <p><strong>性别：</strong>{{ teacher.gender }}</p>
+                        <p><strong>出生日期：</strong>{{ teacher.birth_date.strftime('%Y-%m-%d') if teacher.birth_date }}</p>
+                        <p><strong>民族：</strong>{{ teacher.ethnicity }}</p>
+                        <p><strong>政治面貌：</strong>{{ teacher.political_status }}</p>
+                        <p><strong>籍贯：</strong>{{ teacher.hometown }}</p>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="text-center position-sticky" style="top: 20px;">
-                        <img src="{% if teacher.photo_path %}{{ url_for('static', filename=teacher.photo_path) }}{% else %}{{ url_for('static', filename='img/' + ('boy.png' if teacher.gender == '男' else 'girl.png')) }}{% endif %}"
-                             class="rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover; border: 2px solid #eee;" alt="教师头像">
+
+                <!-- 联系方式 -->
+                <div class="col-md-6">
+                    <h6 class="border-bottom pb-2 mb-3">联系方式</h6>
+                    <div class="mb-3">
+                        <p><strong>手机号码：</strong>{{ teacher.phone }}</p>
+                        <p><strong>电子邮箱：</strong>{{ teacher.email }}</p>
+                        <p><strong>通讯地址：</strong>{{ teacher.address }}</p>
+                    </div>
+                </div>
+
+                <!-- 教育背景 -->
+                <div class="col-md-6">
+                    <h6 class="border-bottom pb-2 mb-3">教育背景</h6>
+                    <div class="mb-3">
+                        <p><strong>学历：</strong>{{ teacher.education_level }}</p>
+                        <p><strong>学位：</strong>{{ teacher.degree }}</p>
+                        <p><strong>本科院校：</strong>{{ teacher.bachelor_school }}</p>
+                        <p><strong>硕士院校：</strong>{{ teacher.master_school }}</p>
+                        <p><strong>博士院校：</strong>{{ teacher.phd_school }}</p>
+                    </div>
+                </div>
+
+                <!-- 工作信息 -->
+                <div class="col-md-6">
+                    <h6 class="border-bottom pb-2 mb-3">工作信息</h6>
+                    <div class="mb-3">
+                        <p><strong>所属学科：</strong>{{ teacher.major }}</p>
+                        <p><strong>教研组：</strong>{{ teacher.teaching_group }}</p>
+                        <p><strong>是否双师：</strong>{{ '是' if teacher.is_dual_teacher else '否' }}</p>
+                        <p><strong>人才称号：</strong>{{ teacher.talent_title }}</p>
+                        <p><strong>最高职称：</strong>{{ teacher.highest_title }}</p>
+                        <p><strong>研究方向：</strong>{{ teacher.research_direction }}</p>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">五个一工程</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="post" action="/save_five_one" id="fiveOneForm" onsubmit="return validateForm()">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3 d-flex align-items-center">
+            <label class="form-label me-2">年份 <span class="text-danger">*</span></label>
+            <select class="form-select me-2" name="year" id="yearSelect" required>
+                <option value="">请选择年份</option>
+                {% for year in range(2020, 2031) %}
+                <option value="{{ year }}">{{ year }}</option>
+                {% endfor %}
+            </select>
+            <button type="button" class="btn btn-secondary" onclick="viewYearInfo()">查看</button>
+        </div>
+        
+        <!-- 一本书 -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">一本书</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">书名 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="book_title" id="book_title" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">书号 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="book_number" id="book_number" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">出版日期 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="publish_date" id="publish_date" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">出版社 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="publisher" id="publisher" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">编著者 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="author" id="author" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">是否有笔记</label>
+                    <select class="form-select" name="has_notes" id="has_notes">
+                        <option value="false">否</option>
+                        <option value="true">是</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 一项教研成果 -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">一项教研成果</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">成果名称 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="teaching_achievement_name" id="teaching_achievement_name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">成果类型 <span class="text-danger">*</span></label>
+                    <select class="form-select" name="achievement_type" id="achievement_type" required>
+                        <option value="">请选择</option>
+                        <option value="论文">论文</option>
+                        <option value="项目">项目</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">时间 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="achievement_date" id="achievement_date" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">排名 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="achievement_ranking" id="achievement_ranking" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- 一项科研成果 -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">一项科研成果</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">成果名称 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="research_achievement_name" id="research_achievement_name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">成果类型 <span class="text-danger">*</span></label>
+                    <select class="form-select" name="research_type" id="research_type" required>
+                        <option value="">请选择</option>
+                        <option value="论文">论文</option>
+                        <option value="项目">项目</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">时间 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="research_date" id="research_date" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">排名 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="research_ranking" id="research_ranking" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- 一项竞赛 -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">一项竞赛</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">竞赛名称 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="competition_name" id="competition_name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">承办单位 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="competition_organizer" id="competition_organizer" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">竞赛类型 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="competition_type" id="competition_type" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">时间 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="competition_date" id="competition_date" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">获奖等级 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="award_level" id="award_level" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">学生姓名 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="student_names" id="student_names" placeholder="输入一个或多个学生姓名" required>
+                </div>
+            </div>
+        </div>
+
+        <!-- 一次培训 -->
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">一次培训</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">培训名称 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="training_name" id="training_name" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">承办单位 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="training_organizer" id="training_organizer" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">培训时间 <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" name="training_date" id="training_date" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">培训地点 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="training_location" id="training_location" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">培训内容简介 <span class="text-danger">*</span></label>
+                    <textarea class="form-control" name="training_description" id="training_description" required></textarea>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">提交所有信息</button>
+    </form>
+</div>
+
+<script>
+// 添加表单验证函数
+function validateForm() {
+    const selectedYear = document.getElementById('yearSelect').value;
+    if (!selectedYear) {
+        alert('请选择年份');
+        return false;
+    }
+    
+    // 确认是否要保存
+    if (!confirm(`确认要保存${selectedYear}年的信息吗？`)) {
+        return false;
+    }
+    
+    return true;
+}
+
+function viewYearInfo() {
+    const year = document.getElementById('yearSelect').value;
+    if (!year) {
+        alert('请选择年份');
+        return;
+    }
+    window.location.href = `/view_five_one/${year}`;
+}
+
+// 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    // 如果有选择的年份，自动加载数据
+    const selectedYear = document.getElementById('yearSelect').value;
+    if (selectedYear) {
+        loadYearData(selectedYear);
+    }
+});
+
+// 提取加载数据的逻辑到单独的函数
+async function loadYearData(year) {
+    try {
+        const response = await fetch(`/api/five_one/${year}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log('API Response:', result); // 添加调试日志
+        
+        if (result.success) {
+            const data = result.data;
+            
+            // 如果是数组（特殊用户查看所有记录），不填充表单
+            if (Array.isArray(data)) {
+                // 清空表单
+                document.getElementById('fiveOneForm').reset();
+                document.getElementById('yearSelect').value = year; // 保持年份选择不变
+                return;
+            }
+            
+            // 填充图书信息
+            document.getElementById('book_title').value = data.book_title || '';
+            document.getElementById('book_number').value = data.book_number || '';
+            document.getElementById('publish_date').value = data.publish_date || '';
+            document.getElementById('publisher').value = data.publisher || '';
+            document.getElementById('author').value = data.author || '';
+            document.getElementById('has_notes').value = data.has_notes ? 'true' : 'false';
+            
+            // 填充教学成果
+            document.getElementById('teaching_achievement_name').value = data.teaching_achievement_name || '';
+            document.getElementById('achievement_type').value = data.achievement_type || '';
+            document.getElementById('achievement_date').value = data.achievement_date || '';
+            document.getElementById('achievement_ranking').value = data.achievement_ranking || '';
+            
+            // 填充科研成果
+            document.getElementById('research_achievement_name').value = data.research_achievement_name || '';
+            document.getElementById('research_type').value = data.research_type || '';
+            document.getElementById('research_date').value = data.research_date || '';
+            document.getElementById('research_ranking').value = data.research_ranking || '';
+            
+            // 填充竞赛信息
+            document.getElementById('competition_name').value = data.competition_name || '';
+            document.getElementById('competition_organizer').value = data.competition_organizer || '';
+            document.getElementById('competition_type').value = data.competition_type || '';
+            document.getElementById('competition_date').value = data.competition_date || '';
+            document.getElementById('award_level').value = data.award_level || '';
+            document.getElementById('student_names').value = data.student_names || '';
+            
+            // 填充培训信息
+            document.getElementById('training_name').value = data.training_name || '';
+            document.getElementById('training_organizer').value = data.training_organizer || '';
+            document.getElementById('training_date').value = data.training_date || '';
+            document.getElementById('training_location').value = data.training_location || '';
+            document.getElementById('training_description').value = data.training_description || '';
+            
+        } else {
+            // 如果没有找到数据，清空表单
+            document.getElementById('fiveOneForm').reset();
+            document.getElementById('yearSelect').value = year; // 保持年份选择不变
+            console.log('No data found message:', result.message); // 添加调试日志
+            alert(result.message || `${year}年暂无数据，您可以开始编辑`);
+        }
+    } catch (error) {
+        console.error('Error loading data:', error); // 添加错误日志
+        alert('加载数据时发生错误，请稍后重试');
+    }
+}
+
+// 年份选择改变时加载数据
+document.getElementById('yearSelect').addEventListener('change', function() {
+    const year = this.value;
+    if (!year) {
+        document.getElementById('fiveOneForm').reset();
+        return;
+    }
+    loadYearData(year);
+});
+</script>
+{% endblock %} 

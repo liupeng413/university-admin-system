@@ -1,15 +1,14 @@
-from app import db, User
+from app import app, db, User
 
-def list_users():
-    """列出所有用户信息"""
-    users = User.query.all()
-    print("\n所有用户信息：")
-    print("-" * 50)
-    for user in users:
-        print(f"用户名: {user.username}")
-        print(f"姓名: {user.name}")
-        print(f"角色: {user.role}")
-        print("-" * 50)
+def check_users():
+    with app.app_context():
+        users = User.query.all()
+        if not users:
+            print("用户表为空！")
+        else:
+            print("现有用户列表：")
+            for user in users:
+                print(f"用户名: {user.username}, 角色: {user.role}, 姓名: {user.name}")
 
 if __name__ == '__main__':
-    list_users() 
+    check_users() 

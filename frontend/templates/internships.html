@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>实习管理</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInternshipModal">
+            <i class="bi bi-plus-lg"></i> 添加实习记录
+        </button>
+    </div>
+
+    <!-- 实习列表 -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="internshipTable">
+                    <thead>
+                        <tr>
+                            <th>学生姓名</th>
+                            <th>学号</th>
+                            <th>班级</th>
+                            <th>学院</th>
+                            <th>专业</th>
+                            <th>实习类型</th>
+                            <th>实习单位</th>
+                            <th>实习成绩</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据将通过JavaScript动态加载 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加实习记录模态框 -->
+<div class="modal fade" id="addInternshipModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加实习记录</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addInternshipForm" method="POST" action="{{ url_for('add_internship') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <!-- 学员信息 -->
+                    <div class="mb-3">
+                        <h6>学员信息</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">学院</label>
+                                <input type="text" class="form-control" name="college" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">专业名称</label>
+                                <input type="text" class="form-control" name="major_name" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">专业性质</label>
+                                <select class="form-select" name="major_type" required>
+                                    <option value="">请选择</option>
+                                    <option value="师范">师范</option>
+                                    <option value="非师范">非师范</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 学生基本信息 -->
+                    <div class="mb-3">
+                        <h6>学生基本信息</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">班级</label>
+                                <input type="text" class="form-control" name="class_name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">学号</label>
+                                <input type="text" class="form-control" name="student_id" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">学生姓名</label>
+                                <input type="text" class="form-control" name="student_name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">性别</label>
+                                <select class="form-select" name="student_gender" required>
+                                    <option value="">请选择</option>
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">联系方式</label>
+                                <input type="text" class="form-control" name="student_phone">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 实习评价 -->
+                    <div class="mb-3">
+                        <h6>实习评价</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">实习成绩</label>
+                                <select class="form-select" name="internship_score">
+                                    <option value="">请选择</option>
+                                    <option value="优秀">优秀</option>
+                                    <option value="良好">良好</option>
+                                    <option value="中等">中等</option>
+                                    <option value="合格">合格</option>
+                                    <option value="不合格">不合格</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">是否优秀实习生</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_excellent_intern" value="true">
+                                    <label class="form-check-label">是</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 学生实习信息 -->
+                    <div class="mb-3">
+                        <h6>学生实习信息</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">实习类型</label>
+                                <select class="form-select" name="internship_type" required>
+                                    <option value="">请选择</option>
+                                    <option value="基地">基地</option>
+                                    <option value="自主">自主</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">基地类型</label>
+                                <select class="form-select" name="base_type">
+                                    <option value="">请选择</option>
+                                    <option value="企业">企业</option>
+                                    <option value="教育">教育</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">实习开始时间</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">实习结束时间</label>
+                                <input type="date" class="form-control" name="end_date" required>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label">实习单位</label>
+                                <input type="text" class="form-control" name="company_name" required>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label">所属省份</label>
+                                <input type="text" class="form-control" name="province" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">所在城市</label>
+                                <input type="text" class="form-control" name="city" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">详细地址</label>
+                                <input type="text" class="form-control" name="detailed_address">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 校外指导教师信息 -->
+                    <div class="mb-3">
+                        <h6>校外指导教师信息</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">姓名</label>
+                                <input type="text" class="form-control" name="external_teacher_name">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">职务</label>
+                                <input type="text" class="form-control" name="external_teacher_position">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">联系方式</label>
+                                <input type="text" class="form-control" name="external_teacher_phone">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitInternship()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑实习记录模态框 -->
+<div class="modal fade" id="editInternshipModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">编辑实习记录</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInternshipForm">
+                    <!-- 表单内容与添加实习记录相同，但会预填充数据 -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateInternship()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 加载实习列表
+function loadInternships() {
+    fetch('/api/internships')
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                const tbody = document.querySelector('#internshipTable tbody');
+                tbody.innerHTML = '';
+                data.data.forEach(internship => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${internship.student_name}</td>
+                        <td>${internship.student_id}</td>
+                        <td>${internship.class_name}</td>
+                        <td>${internship.college}</td>
+                        <td>${internship.major_name}</td>
+                        <td>${internship.internship_type}</td>
+                        <td>${internship.company_name}</td>
+                        <td>${internship.internship_score || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="viewInternship(${internship.id})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="editInternship(${internship.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteInternship(${internship.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// 提交实习记录
+function submitInternship() {
+    const form = document.getElementById('addInternshipForm');
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => {
+        if (key === 'is_excellent_intern') {
+            data[key] = formData.get(key) === 'true';
+        } else {
+            data[key] = value;
+        }
+    });
+
+    fetch('/api/internships', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 200) {
+            alert('添加成功！');
+            $('#addInternshipModal').modal('hide');
+            loadInternships();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// 查看实习详情
+function viewInternship(id) {
+    fetch(`/api/internships/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                // 显示详情模态框
+                const internship = data.data;
+                let html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>学生姓名：</strong>${internship.student_name}</p>
+                            <p><strong>学号：</strong>${internship.student_id}</p>
+                            <p><strong>班级：</strong>${internship.class_name}</p>
+                            <p><strong>学院：</strong>${internship.college}</p>
+                            <p><strong>专业：</strong>${internship.major_name}</p>
+                            <p><strong>专业性质：</strong>${internship.major_type}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>实习类型：</strong>${internship.internship_type}</p>
+                            <p><strong>实习单位：</strong>${internship.company_name}</p>
+                            <p><strong>实习时间：</strong>${internship.start_date} 至 ${internship.end_date}</p>
+                            <p><strong>实习成绩：</strong>${internship.internship_score || '-'}</p>
+                            <p><strong>是否优秀实习生：</strong>${internship.is_excellent_intern ? '是' : '否'}</p>
+                        </div>
+                    </div>
+                `;
+                // 使用Bootstrap的模态框显示详情
+                const modal = new bootstrap.Modal(document.getElementById('viewInternshipModal'));
+                document.getElementById('viewInternshipModal').querySelector('.modal-body').innerHTML = html;
+                modal.show();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// 编辑实习记录
+function editInternship(id) {
+    fetch(`/api/internships/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                const internship = data.data;
+                const form = document.getElementById('editInternshipForm');
+                // 填充表单数据
+                Object.keys(internship).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.type === 'checkbox') {
+                            input.checked = internship[key];
+                        } else if (input.type === 'date') {
+                            // 确保日期格式为 YYYY-MM-DD
+                            const date = new Date(internship[key]);
+                            const formattedDate = date.toISOString().split('T')[0];
+                            input.value = formattedDate;
+                        } else {
+                            input.value = internship[key];
+                        }
+                    }
+                });
+                // 显示编辑模态框
+                const modal = new bootstrap.Modal(document.getElementById('editInternshipModal'));
+                modal.show();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// 更新实习记录
+function updateInternship() {
+    const form = document.getElementById('editInternshipForm');
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => {
+        if (key === 'is_excellent_intern') {
+            data[key] = formData.get(key) === 'true';
+        } else {
+            data[key] = value;
+        }
+    });
+
+    fetch(`/api/internships/${data.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 200) {
+            alert('更新成功！');
+            $('#editInternshipModal').modal('hide');
+            loadInternships();
+        } else {
+            alert('更新失败：' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// 删除实习记录
+function deleteInternship(id) {
+    if (confirm('确定要删除这条实习记录吗？')) {
+        fetch(`/api/internships/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                alert('删除成功！');
+                loadInternships();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// 页面加载完成后执行
+document.addEventListener('DOMContentLoaded', function() {
+    loadInternships();
+});
+</script>
+{% endblock %} 

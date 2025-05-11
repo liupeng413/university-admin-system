@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">师资队伍</h5>
+            
+            <!-- 搜索栏 -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchInput" placeholder="搜索教师姓名、工号或职称...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="searchTeachers()">
+                            <i class="bi bi-search"></i> 搜索
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 教师列表 -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>工号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>职称</th>
+                            <th>学历</th>
+                            <th>所属学科</th>
+                            <th>教研组</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacherList">
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td>{{ teacher.employee_number }}</td>
+                            <td>{{ teacher.name }}</td>
+                            <td>{{ teacher.gender }}</td>
+                            <td>{{ teacher.highest_title }}</td>
+                            <td>{{ teacher.education_level }}</td>
+                            <td>{{ teacher.major }}</td>
+                            <td>{{ teacher.teaching_group }}</td>
+                            <td>
+                                <a href="{{ url_for('view_faculty_member', id=teacher.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> 查看详情
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function searchTeachers() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.getElementById('teacherList').getElementsByTagName('tr');
+    
+    for (let row of rows) {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    }
+}
+
+// 添加回车键搜索功能
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchTeachers();
+    }
+});
+</script>
+{% endblock %} 

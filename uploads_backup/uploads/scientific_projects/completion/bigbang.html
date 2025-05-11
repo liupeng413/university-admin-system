@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>预算大爆炸 - 抽卡系统（含说明）</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      margin: 40px;
+      background-color: #eef5ff;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin-right: 10px;
+    }
+    .result {
+      font-size: 16px;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #ffffff;
+      border-left: 5px solid #3399ff;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .highlight {
+      color: #ff5500;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="btn">🎰 点击抽卡</button>
+  <button id="exportBtn" disabled>📄 导出结果 TXT</button>
+
+  <div id="results"></div>
+
+<script>
+const data = {
+  项目名称: ["校园快递管理", "在线考试监控", "校园二手交易", "校园共享单车", "校园活动预约", "智慧课堂互动", "校园食堂订餐"],
+  需求卡片: ["实名认证(6K)", "地图追踪(8K)", "支付集成(5K)", "人脸识别(10K)", "推荐算法(7K)", "多平台适配(6K)", "积分系统(4K)", "社交分享(3K)", "大数据分析(10K)", "安全防护(8K)"],
+
+  比例因子SF: {
+    "PREC": "项目先例性（是否是重复开发类似项目）",
+    "FLEX": "开发灵活性（对开发过程的限制程度）",
+    "RESL": "风险解决程度（前期风险分析与架构设计充分性）",
+    "TEAM": "团队凝聚力（项目团队协作与沟通程度）",
+    "PMAT": "过程成熟度（开发过程的标准化、规范化程度）"
+  },
+  SF等级值: {
+    "极低": 6.20, "很低": 4.96, "低": 3.72,
+    "标称": 2.48, "高": 1.24, "很高": 0.00, "极高": -1.24
+  },
+
+  工作量乘数EM: {
+    "RELY": "对可靠性的要求",
+    "DATA": "数据库和数据量复杂性",
+    "CPLX": "软件功能复杂性",
+    "RUSE": "可复用组件需求",
+    "TIME": "时间响应约束",
+    "STOR": "存储空间约束",
+    "PVOL": "平台波动性",
+    "ACAP": "分析员能力",
+    "PCAP": "程序员能力",
+    "PCON": "人员稳定性",
+    "APEX": "应用领域经验",
+    "PLEX": "平台经验",
+    "LTEX": "语言与工具经验",
+    "TOOL": "软件工具支持程度",
+    "SITE": "多地开发协调难度",
+    "SCED": "项目进度压力",
+    "DOCU": "文档完整性要求"
+  },
+  EM等级值: {
+    "极低": 1.46, "很低": 1.29, "低": 1.15,
+    "标称": 1.00, "高": 0.87, "很高": 0.74, "极高": 0.62
+  },
+
+  人员配置: {
+    "🌟🌟🌟(高级)": 0.8,
+    "🌟🌟⭐(高+中)": 1.0,
+    "🌟⭐⭐(中级)": 1.2,
+    "⭐⭐⭐(初级)": 1.4
+  },
+
+  突发事件: ["负责人离职(+30月)", "项目延期(+50月)", "客户变更(+40月)", "技术返工(+60月)", "沟通问题(+20月)", "开源支持(-30月)", "额外融资(-50月)", "骨干病假(+25月)", "硬件故障(+20月)", "客户减少需求(-40月)"]
+};
+
+let step = 0;
+const steps = ["项目名称", "需求卡片", "比例因子SF", "工作量乘数EM", "人员配置", "突发事件"];
+let resultsText = "";
+
+document.getElementById('btn').onclick = async function(){
+  if(step >= steps.length) return;
+  const btn = this;
+  btn.disabled = true;
+
+  const stepName = steps[step];
+  const container = document.createElement('div');
+  container.className = "result";
+  container.innerHTML = `<b>${stepName}：</b><span class="highlight">抽取中...</span>`;
+  document.getElementById('results').appendChild(container);
+
+  await animateDrawWithExplain(container, stepName);
+
+  step++;
+  if (step >= steps.length) {
+    btn.disabled = true;
+    document.getElementById('exportBtn').disabled = false;
+  } else {
+    btn.disabled = false;
+  }
+};
+
+document.getElementById('exportBtn').onclick = function(){
+  const blob = new Blob([resultsText], {type: "text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "预算大爆炸_抽卡结果.txt";
+  a.click();
+};
+
+function randomChoice(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function randomChoices(arr, n){
+  let copy = [...arr], res = [];
+  for(let i = 0; i < n; i++){
+    let idx = Math.floor(Math.random() * copy.length);
+    res.push(copy.splice(idx,1)[0]);
+  }
+  return res;
+}
+
+async function animateDrawWithExplain(div, stepName) {
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  if(stepName === "项目名称"){
+    const options = data["项目名称"];
+    let final = randomChoice(options);
+    for (let i = 0; i < 15; i++) {
+      div.innerHTML = `<b>${stepName}：</b><span class="highlight">${randomChoice(options)}</span>`;
+      await delay(40 + i * 8);
+    }
+    div.innerHTML = `<b>${stepName}：</b><span class="highlight">${final}</span>`;
+    resultsText += `项目名称：${final}\n`;
+  }
+
+  else if(stepName === "需求卡片"){
+    const options = data["需求卡片"];
+    let final = randomChoices(options, 3);
+    for (let i = 0; i < 15; i++) {
+      let temp = randomChoices(options, 3);
+      div.innerHTML = `<b>${stepName}：</b><span class="highlight">${temp.join("，")}</span>`;
+      await delay(50 + i * 6);
+    }
+    div.innerHTML = `<b>${stepName}：</b><span class="highlight">${final.join("，")}</span>`;
+    resultsText += `需求卡片：${final.join("，")}\n`;
+  }
+
+  else if(stepName === "比例因子SF"){
+    let final = Object.entries(data["比例因子SF"]).map(([key, desc]) => {
+      let level = randomChoice(Object.keys(data["SF等级值"]));
+      let val = data["SF等级值"][level];
+      return `${key}（${desc}）→ ${level}，${val}`;
+    });
+    for (let i = 0; i < 15; i++) {
+      let temp = Object.entries(data["比例因子SF"]).map(([key, desc]) => {
+        let level = randomChoice(Object.keys(data["SF等级值"]));
+        let val = data["SF等级值"][level];
+        return `<span class="highlight">${key}（${desc}）→ ${level}，${val}</span>`;
+      });
+      div.innerHTML = `<b>${stepName}：</b><br>` + temp.join("<br>");
+      await delay(50 + i * 6);
+    }
+    div.innerHTML = `<b>${stepName}：</b><br>` + final.join("<br>");
+    resultsText += `比例因子SF：\n${final.join("\n")}\n`;
+  }
+
+  else if(stepName === "工作量乘数EM"){
+    const all = Object.entries(data["工作量乘数EM"]);
+    const selected = randomChoices(all, 4);
+    let final = selected.map(([key, desc]) => {
+      let level = randomChoice(Object.keys(data["EM等级值"]));
+      let val = data["EM等级值"][level];
+      return `${key}（${desc}）→ ${level}，×${val}`;
+    });
+    for (let i = 0; i < 15; i++) {
+      let temp = randomChoices(all, 4).map(([key, desc]) => {
+        let level = randomChoice(Object.keys(data["EM等级值"]));
+        let val = data["EM等级值"][level];
+        return `<span class="highlight">${key}（${desc}）→ ${level}，×${val}</span>`;
+      });
+      div.innerHTML = `<b>${stepName}：</b><br>` + temp.join("<br>");
+      await delay(50 + i * 6);
+    }
+    div.innerHTML = `<b>${stepName}：</b><br>` + final.join("<br>");
+    resultsText += `工作量乘数EM：\n${final.join("\n")}\n`;
+  }
+
+  else if(stepName === "人员配置"){
+    let entries = Object.entries(data["人员配置"]);
+    let [finalName, finalVal] = randomChoice(entries);
+    for (let i = 0; i < 15; i++) {
+      let [n, v] = randomChoice(entries);
+      div.innerHTML = `<b>${stepName}：</b><span class="highlight">${n}（×${v}）</span>`;
+      await delay(40 + i * 6);
+    }
+    div.innerHTML = `<b>${stepName}：</b><span class="highlight">${finalName}（×${finalVal}）</span>`;
+    resultsText += `人员配置：${finalName}（×${finalVal}）\n`;
+  }
+
+  else if(stepName === "突发事件"){
+    const options = data["突发事件"];
+    let final = randomChoices(options, 2);
+    for (let i = 0; i < 15; i++) {
+      let temp = randomChoices(options, 2);
+      div.innerHTML = `<b>${stepName}：</b><span class="highlight">${temp.join("，")}</span>`;
+      await delay(50 + i * 6);
+    }
+    div.innerHTML = `<b>${stepName}：</b><span class="highlight">${final.join("，")}</span>`;
+    resultsText += `突发事件：${final.join("，")}\n`;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <!-- 添加隐藏的input来存储当前用户名 -->
+    <input type="hidden" id="currentUsername" value="{{ current_user.username }}">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="text-primary-color">学院大事记</h2>
+        </div>
+        {% if current_user.username in ['张艳鹏', '王鹏'] %}
+        <div class="col-auto">
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                <i class="bi bi-plus-lg"></i> 添加大事记
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>标题</th>
+                                    <th>时间</th>
+                                    <th>简介</th>
+                                    <th>附件</th>
+                                    <th>创建人</th>
+                                    <th>创建时间</th>
+                                    {% if current_user.username in ['张艳鹏', '王鹏'] %}
+                                    <th>操作</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTableBody">
+                                <!-- 数据将通过JavaScript动态加载 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加大事记模态框 -->
+<div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addEventModalLabel">添加大事记</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addEventForm" enctype="multipart/form-data" method="POST" action="{{ url_for('add_college_event') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">标题</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="event_date" class="form-label">时间</label>
+                        <input type="date" class="form-control" id="event_date" name="event_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">简介</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="attachment" class="form-label">附件</label>
+                        <input type="file" class="form-control" id="attachment" name="attachment">
+                        <div id="fileInfo" class="form-text"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" onclick="addEvent()">添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadEvents();
+    
+    // 添加文件选择监听器
+    document.getElementById('attachment').addEventListener('change', function(e) {
+        const fileInfo = document.getElementById('fileInfo');
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            fileInfo.textContent = `已选择文件: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+        } else {
+            fileInfo.textContent = '';
+        }
+    });
+});
+
+function loadEvents() {
+    fetch('/api/college_events')
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                const tbody = document.getElementById('eventsTableBody');
+                const currentUsername = document.getElementById('currentUsername').value;
+                tbody.innerHTML = '';
+                
+                data.data.forEach(event => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${event.title}</td>
+                        <td>${event.event_date}</td>
+                        <td>${event.description}</td>
+                        <td>
+                            ${event.attachment_path ? 
+                                `<a href="/download/${event.attachment_path}" class="text-danger" target="_blank">
+                                    ${event.original_filename}
+                                    <i class="bi bi-download ms-1"></i>
+                                </a>` : 
+                                '无'}
+                        </td>
+                        <td>${event.creator_name}</td>
+                        <td>${event.created_at}</td>
+                        ${(currentUsername === '张艳鹏' || currentUsername === '王鹏') ? 
+                            `<td>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteEvent(${event.id})">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>` : 
+                            ''}
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        });
+}
+
+function addEvent() {
+    const form = document.getElementById('addEventForm');
+    const formData = new FormData(form);
+    
+    // 显示正在上传的提示
+    const submitBtn = document.querySelector('#addEventModal .btn-danger');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = '正在上传...';
+    submitBtn.disabled = true;
+    
+    fetch('/api/college_events', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 200) {
+            alert('添加成功');
+            $('#addEventModal').modal('hide');
+            form.reset();
+            document.getElementById('fileInfo').textContent = '';
+            loadEvents();
+        } else if (data.code === 409) {  // 文件已存在
+            if (confirm('文件已存在，是否重命名后重试？')) {
+                // 清空文件输入框，让用户重新选择或重命名文件
+                const fileInput = document.getElementById('attachment');
+                fileInput.value = '';
+                document.getElementById('fileInfo').textContent = '';
+            }
+        } else {
+            alert(data.message || '添加失败');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('添加失败');
+    })
+    .finally(() => {
+        // 恢复按钮状态
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function deleteEvent(id) {
+    if (confirm('确定要删除这条记录吗？')) {
+        fetch(`/api/college_events/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                alert('删除成功');
+                loadEvents();
+            } else {
+                alert(data.message || '删除失败');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败');
+        });
+    }
+}
+</script>
+{% endblock %} 

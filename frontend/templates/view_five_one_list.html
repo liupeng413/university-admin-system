@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ year }}年五个一工程汇总</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="mb-3">
+        <a href="{{ url_for('five_one') }}" class="btn btn-secondary">返回</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>教师姓名</th>
+                    <th>一本书</th>
+                    <th>一项教研成果</th>
+                    <th>一项科研成果</th>
+                    <th>一项竞赛</th>
+                    <th>一次培训</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ teachers[record.teacher_id] }}</td>
+                    <td>{{ record.book_title }}</td>
+                    <td>{{ record.teaching_achievement_name }}</td>
+                    <td>{{ record.research_achievement_name }}</td>
+                    <td>{{ record.competition_name }}</td>
+                    <td>{{ record.training_name }}</td>
+                    <td>
+                        <a href="{{ url_for('view_five_one', year=year, teacher_id=record.teacher_id) }}" class="btn btn-primary btn-sm">查看详情</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

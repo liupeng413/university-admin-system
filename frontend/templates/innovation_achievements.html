@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">双创成果</h5>
+            <!-- 子标签页导航 -->
+            <ul class="nav nav-pills mb-3" id="innovationTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="projects-tab" data-bs-toggle="pill" 
+                            data-bs-target="#projects" type="button" role="tab">
+                        大学生创新创业项目
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="competitions-tab" data-bs-toggle="pill" 
+                            data-bs-target="#competitions" type="button" role="tab">
+                        学科竞赛
+                    </button>
+                </li>
+            </ul>
+
+            <!-- 子标签页内容 -->
+            <div class="tab-content" id="innovationTabsContent">
+                <!-- 大学生创新创业项目标签页 -->
+                <div class="tab-pane fade show active" id="projects" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>大学生创新创业项目</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                            <i class="bi bi-plus-circle"></i> 添加项目
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="projectsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>项目名称</th>
+                                    <th>项目类型</th>
+                                    <th>项目级别</th>
+                                    <th>学生负责人</th>
+                                    <th>团队成员</th>
+                                    <th>立项时间</th>
+                                    <th>结项时间</th>
+                                    <th>状态</th>
+                                    <th>项目成果</th>
+                                    <th>附件</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 学科竞赛标签页 -->
+                <div class="tab-pane fade" id="competitions" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>学科竞赛</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCompetitionModal">
+                            <i class="bi bi-plus-circle"></i> 添加竞赛
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="competitionsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>竞赛名称</th>
+                                    <th>竞赛级别</th>
+                                    <th>获奖等级</th>
+                                    <th>学生负责人</th>
+                                    <th>团队成员</th>
+                                    <th>参赛作品</th>
+                                    <th>获奖时间</th>
+                                    <th>主办单位</th>
+                                    <th>获奖证书</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创新创业项目添加模态框 -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加创新创业项目</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProjectForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">项目名称</label>
+                            <input type="text" class="form-control" name="project_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">项目类型</label>
+                            <select class="form-select" name="project_type" required>
+                                <option value="">请选择</option>
+                                <option value="创新训练">创新训练</option>
+                                <option value="创业训练">创业训练</option>
+                                <option value="创业实践">创业实践</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">项目级别</label>
+                            <select class="form-select" name="project_level" required>
+                                <option value="">请选择</option>
+                                <option value="国家级">国家级</option>
+                                <option value="省级">省级</option>
+                                <option value="校级">校级</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">资助金额（元）</label>
+                            <input type="number" class="form-control" name="funding">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学生负责人</label>
+                            <input type="text" class="form-control" name="student_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学生学号</label>
+                            <input type="text" class="form-control" name="student_id" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">团队成员</label>
+                        <input type="text" class="form-control" name="team_members" placeholder="多个成员用逗号分隔">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">立项时间</label>
+                            <input type="date" class="form-control" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">结项时间</label>
+                            <input type="date" class="form-control" name="end_date">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目状态</label>
+                        <select class="form-select" name="status" required>
+                            <option value="">请选择</option>
+                            <option value="在研">在研</option>
+                            <option value="已结题">已结题</option>
+                            <option value="已终止">已终止</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目成果</label>
+                        <textarea class="form-control" name="achievement" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">附件</label>
+                        <input type="file" class="form-control" name="attachment">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitProject()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 学科竞赛添加模态框 -->
+<div class="modal fade" id="addCompetitionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加学科竞赛</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCompetitionForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">竞赛名称</label>
+                            <input type="text" class="form-control" name="competition_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">竞赛级别</label>
+                            <select class="form-select" name="competition_level" required>
+                                <option value="">请选择</option>
+                                <option value="国家级">国家级</option>
+                                <option value="省级">省级</option>
+                                <option value="校级">校级</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">获奖等级</label>
+                            <select class="form-select" name="award_level" required>
+                                <option value="">请选择</option>
+                                <option value="特等奖">特等奖</option>
+                                <option value="一等奖">一等奖</option>
+                                <option value="二等奖">二等奖</option>
+                                <option value="三等奖">三等奖</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">获奖时间</label>
+                            <input type="date" class="form-control" name="competition_date" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学生负责人</label>
+                            <input type="text" class="form-control" name="student_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学生学号</label>
+                            <input type="text" class="form-control" name="student_id" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">团队成员</label>
+                        <input type="text" class="form-control" name="team_members" placeholder="多个成员用逗号分隔">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">参赛作品名称</label>
+                        <input type="text" class="form-control" name="work_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">主办单位</label>
+                        <input type="text" class="form-control" name="organizer" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">获奖证书</label>
+                        <input type="file" class="form-control" name="attachment" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitCompetition()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面加载时获取数据
+document.addEventListener('DOMContentLoaded', function() {
+    loadProjects();
+    loadCompetitions();
+});
+
+// 加载创新创业项目数据
+function loadProjects() {
+    fetch('/api/innovation_projects')
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 200) {
+            const tbody = document.querySelector('#projectsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(project => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${project.project_name}</td>
+                        <td>${project.project_type}</td>
+                        <td>${project.project_level}</td>
+                        <td>${project.student_name}</td>
+                        <td>${project.team_members || ''}</td>
+                        <td>${project.start_date}</td>
+                        <td>${project.end_date || ''}</td>
+                        <td>${project.status}</td>
+                        <td>${project.achievement || ''}</td>
+                        <td>${project.attachment_path ? `<a href="/download/${project.attachment_path}" target="_blank">下载</a>` : '无'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProject(${project.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    });
+}
+
+// 加载学科竞赛数据
+function loadCompetitions() {
+    fetch('/api/competitions')
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 200) {
+            const tbody = document.querySelector('#competitionsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(competition => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${competition.competition_name}</td>
+                        <td>${competition.competition_level}</td>
+                        <td>${competition.award_level}</td>
+                        <td>${competition.student_name}</td>
+                        <td>${competition.team_members || ''}</td>
+                        <td>${competition.work_name}</td>
+                        <td>${competition.competition_date}</td>
+                        <td>${competition.organizer}</td>
+                        <td>${competition.attachment_path ? 
+                            `<a href="/download/${competition.attachment_path}" target="_blank">查看证书</a>` : 
+                            '无'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteCompetition(${competition.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    });
+}
+
+// 提交创新创业项目
+function submitProject() {
+    const form = document.getElementById('addProjectForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/innovation_projects', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code == 200 || data.success) {
+            $('#addProjectModal').modal('hide');
+            form.reset();
+            loadProjects();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 提交学科竞赛
+function submitCompetition() {
+    const form = document.getElementById('addCompetitionForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/competitions', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code === 200) {
+            $('#addCompetitionModal').modal('hide');
+            form.reset();
+            loadCompetitions();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 删除创新创业项目
+function deleteProject(id) {
+    if (confirm('确定要删除这个项目吗？')) {
+        fetch(`/api/innovation_projects/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                loadProjects();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+
+// 删除学科竞赛
+function deleteCompetition(id) {
+    if (confirm('确定要删除这个竞赛记录吗？')) {
+        fetch(`/api/competitions/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                loadCompetitions();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">科研立项与成果</h5>
+            <!-- 子标签页导航 -->
+            <ul class="nav nav-pills mb-3" id="scientificTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="projects-tab" data-bs-toggle="pill" 
+                            data-bs-target="#projects" type="button" role="tab">
+                        科研立项
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="achievements-tab" data-bs-toggle="pill" 
+                            data-bs-target="#achievements" type="button" role="tab">
+                        科研成果
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="awards-tab" data-bs-toggle="pill" 
+                            data-bs-target="#awards" type="button" role="tab">
+                        科研奖励
+                    </button>
+                </li>
+            </ul>
+
+            <!-- 子标签页内容 -->
+            <div class="tab-content" id="scientificTabsContent">
+                <!-- 科研立项标签页 -->
+                <div class="tab-pane fade show active" id="projects" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>科研立项</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+                            <i class="bi bi-plus-circle"></i> 添加立项
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="projectsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>项目名称</th>
+                                    <th>获批文件</th>
+                                    <th>立项通知书</th>
+                                    <th>结题证书</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 科研成果标签页 -->
+                <div class="tab-pane fade" id="achievements" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>科研成果</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAchievementModal">
+                            <i class="bi bi-plus-circle"></i> 添加成果
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="achievementsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>成果类型</th>
+                                    <th>成果名称</th>
+                                    <th>成果描述</th>
+                                    <th>转化合同</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 科研奖励标签页 -->
+                <div class="tab-pane fade" id="awards" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>科研奖励</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAwardModal">
+                            <i class="bi bi-plus-circle"></i> 添加奖励
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="awardsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>奖项名称</th>
+                                    <th>级别</th>
+                                    <th>成员</th>
+                                    <th>时间</th>
+                                    <th>授予单位</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 科研立项添加模态框 -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加科研立项</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProjectForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label">项目名称</label>
+                        <input type="text" class="form-control" name="project_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">获批文件</label>
+                        <input type="file" class="form-control" name="approval_doc">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">立项通知书</label>
+                        <input type="file" class="form-control" name="notice_doc">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">结题证书</label>
+                        <input type="file" class="form-control" name="completion_cert">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitProject()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 科研成果添加模态框 -->
+<div class="modal fade" id="addAchievementModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加科研成果</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAchievementForm">
+                    <div class="mb-3">
+                        <label class="form-label">成果类型</label>
+                        <select class="form-select" name="achievement_type" required>
+                            <option value="">请选择成果类型</option>
+                            <option value="论文">论文</option>
+                            <option value="专利">专利</option>
+                            <option value="专著">专著</option>
+                            <option value="成果转化">成果转化</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">成果名称</label>
+                        <input type="text" class="form-control" name="achievement_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">成果描述</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">转化合同（如有）</label>
+                        <input type="file" class="form-control" name="contract">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAchievement()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 科研奖励添加模态框 -->
+<div class="modal fade" id="addAwardModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加科研奖励</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAwardForm">
+                    <div class="mb-3">
+                        <label class="form-label">奖项名称</label>
+                        <input type="text" class="form-control" name="award_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">级别</label>
+                        <input type="text" class="form-control" name="level" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">成员</label>
+                        <input type="text" class="form-control" name="members" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">获奖时间</label>
+                        <input type="date" class="form-control" name="award_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">授予单位</label>
+                        <input type="text" class="form-control" name="issuing_authority" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitAward()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面加载时获取数据
+document.addEventListener('DOMContentLoaded', function() {
+    loadProjects();
+    loadAchievements();
+    loadAwards();
+});
+
+// 提交科研立项
+function submitProject() {
+    const form = document.getElementById('addProjectForm');
+    const formData = new FormData(form);
+    
+    // 验证必填字段
+    const projectName = formData.get('project_name');
+    if (!projectName) {
+        alert('请输入项目名称');
+        return;
+    }
+
+    // 验证文件上传
+    const approvalDoc = form.querySelector('input[name="approval_doc"]').files[0];
+    const noticeDoc = form.querySelector('input[name="notice_doc"]').files[0];
+    const completionCert = form.querySelector('input[name="completion_cert"]').files[0];
+
+    if (!approvalDoc) {
+        alert('请上传获批文件');
+        return;
+    }
+
+    if (!noticeDoc) {
+        alert('请上传立项通知书');
+        return;
+    }
+
+    if (!completionCert) {
+        alert('请上传结题证书');
+        return;
+    }
+    
+    fetch('/api/scientific_projects', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#addProjectModal').modal('hide');
+            form.reset();
+            loadProjects();
+            alert('添加成功！');
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 提交科研成果
+function submitAchievement() {
+    const form = document.getElementById('addAchievementForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/research_papers', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code == 200 || data.success) {
+            $('#addAchievementModal').modal('hide');
+            form.reset();
+            loadAchievements();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 提交科研奖励
+function submitAward() {
+    const form = document.getElementById('addAwardForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/scientific_awards', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.code == 200 || data.success) {
+            $('#addAwardModal').modal('hide');
+            form.reset();
+            loadAwards();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 加载科研立项数据
+function loadProjects() {
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    fetch('/api/scientific_projects', {
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#projectsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(project => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${project.project_name}</td>
+                        <td>
+                            ${project.approval_doc ? `<a href="/download/${project.approval_doc}" target="_blank">查看</a>` : '无'}
+                        </td>
+                        <td>
+                            ${project.notice_doc ? `<a href="/download/${project.notice_doc}" target="_blank">查看</a>` : '无'}
+                        </td>
+                        <td>
+                            ${project.completion_cert ? `<a href="/download/${project.completion_cert}" target="_blank">查看</a>` : '无'}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProject(${project.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            alert('加载失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('加载失败：' + error);
+    });
+}
+
+// 加载科研成果数据
+function loadAchievements() {
+    fetch('/api/research_papers')
+    .then(response => response.json())
+    .then(data => {
+        if (data.code == 200 || data.success) {
+            const tbody = document.querySelector('#achievementsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(achievement => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${achievement.achievement_type}</td>
+                        <td>${achievement.achievement_name}</td>
+                        <td>${achievement.description || ''}</td>
+                        <td>${achievement.contract_path ? 
+                            `<a href="/download/${achievement.contract_path}" target="_blank">查看合同</a>` : 
+                            '无'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAchievement(${achievement.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    });
+}
+
+// 加载科研奖励数据
+function loadAwards() {
+    fetch('/api/scientific_awards')
+    .then(response => response.json())
+    .then(data => {
+        if (data.code == 200 || data.success) {
+            const tbody = document.querySelector('#awardsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(award => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${award.award_name}</td>
+                        <td>${award.level}</td>
+                        <td>${award.members}</td>
+                        <td>${award.award_date}</td>
+                        <td>${award.issuing_authority}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteAward(${award.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+    });
+}
+
+// 删除科研立项
+function deleteProject(id) {
+    if (confirm('确定要删除这个项目吗？')) {
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        fetch(`/api/scientific_projects/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadProjects();
+                alert('删除成功！');
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+
+// 删除科研成果
+function deleteAchievement(id) {
+    if (confirm('确定要删除这个成果吗？')) {
+        fetch(`/api/research_papers/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code == 200 || data.success) {
+                loadAchievements();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+
+// 删除科研奖励
+function deleteAward(id) {
+    if (confirm('确定要删除这个奖励吗？')) {
+        fetch(`/api/scientific_awards/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.code == 200 || data.success) {
+                loadAwards();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+</script>
+{% endblock %} 

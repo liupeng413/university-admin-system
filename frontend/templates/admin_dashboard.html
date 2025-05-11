@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-4 text-danger">管理功能</h4>
+                    
+                    <!-- 教师管理模块 -->
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">教师管理</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">教师列表管理</h6>
+                                        <p class="card-text">查看、编辑和管理教师信息</p>
+                                        <a href="{{ url_for('teachers') }}" class="btn btn-outline-danger">进入管理</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">教师统计分析</h6>
+                                        <p class="card-text">查看教师数据统计和分析报告</p>
+                                        <a href="{{ url_for('teacher_stats') }}" class="btn btn-outline-danger">查看统计</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 文件管理模块 -->
+                    <div>
+                        <h5 class="border-bottom pb-2 mb-3">文件管理</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">文件管理</h6>
+                                        <p class="card-text">管理系统文件和教师上传的文件</p>
+                                        <a href="{{ url_for('file_management') }}" class="btn btn-outline-danger">进入管理</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.btn-outline-danger {
+    border-width: 2px;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+h4.text-danger {
+    font-weight: 600;
+}
+
+h5 {
+    color: #666;
+    font-weight: 600;
+}
+
+.card-title {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.card-text {
+    color: #666;
+}
+</style>
+{% endblock %} 

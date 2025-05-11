@@ -1,0 +1,1264 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">教师常规教学</h5>
+            <!-- 教师常规教学子标签页导航 -->
+            <ul class="nav nav-pills mb-3" id="teachingTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="courses-tab" data-bs-toggle="pill" 
+                            data-bs-target="#courses" type="button" role="tab">
+                        任课情况
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="internships-tab" data-bs-toggle="pill" 
+                            data-bs-target="#internships" type="button" role="tab">
+                        实习管理
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="graduation-tab" data-bs-toggle="pill" 
+                            data-bs-target="#graduation" type="button" role="tab">
+                        毕业设计
+                    </button>
+                </li>
+            </ul>
+
+            <!-- 教师常规教学子标签页内容 -->
+            <div class="tab-content" id="teachingTabsContent">
+                <!-- 任课情况标签页 -->
+                <div class="tab-pane fade show active" id="courses" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>任课情况</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                            <i class="bi bi-plus-circle"></i> 添加课程
+                        </button>
+                    </div>
+                    
+                    <!-- 添加筛选表单 -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form id="courseFilterForm" class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">学期</label>
+                                    <select class="form-select" name="semester" id="semesterFilter">
+                                        <option value="">全部</option>
+                                        <script>
+                                            // 生成从2023年到2050年的学期选项
+                                            for (let year = 2023; year <= 2050; year++) {
+                                                document.write(`<option value="${year}年春季">${year}年春季</option>`);
+                                                document.write(`<option value="${year}年冬季">${year}年冬季</option>`);
+                                            }
+                                        </script>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">课程名称</label>
+                                    <input type="text" class="form-control" name="course_name" id="courseNameFilter" placeholder="输入课程名称">
+                                </div>
+                                {% if is_admin_teacher %}
+                                <div class="col-md-3">
+                                    <label class="form-label">教师姓名</label>
+                                    <input type="text" class="form-control" name="teacher_name" id="teacherNameFilter" placeholder="输入教师姓名">
+                                </div>
+                                {% endif %}
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary" onclick="filterCourses()">
+                                        <i class="bi bi-search"></i> 筛选
+                                    </button>
+                                    <button type="button" class="btn btn-secondary ms-2" onclick="resetFilter()">
+                                        <i class="bi bi-x-circle"></i> 重置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    {% if is_admin_teacher %}
+                                    <th>教师姓名</th>
+                                    {% endif %}
+                                    <th>学期</th>
+                                    <th>课程名称</th>
+                                    <th>上课教室</th>
+                                    <th>上课班级</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                <tr>
+                                    {% if is_admin_teacher %}
+                                    <td>{{ course.teacher.name }}</td>
+                                    {% endif %}
+                                    <td>{{ course.semester }}</td>
+                                    <td>{{ course.course_name }}</td>
+                                    <td>{{ course.classroom }}</td>
+                                    <td>{{ course.class_name }}</td>
+                                    <td>
+                                        {% if is_admin_teacher or course.teacher_id == current_user.id %}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editCourse({{ course.id }})">
+                                            <i class="bi bi-pencil"></i> 编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCourse({{ course.id }})">
+                                            <i class="bi bi-trash"></i> 删除
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 实习管理标签页 -->
+                <div class="tab-pane fade" id="internships" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>实习管理</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addInternshipModal">
+                            <i class="bi bi-plus-circle"></i> 添加实习
+                        </button>
+                    </div>
+                    
+                    <!-- 添加筛选表单 -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form id="internshipFilterForm" class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">学生姓名</label>
+                                    <input type="text" class="form-control" name="student_name" id="studentNameFilter" placeholder="输入学生姓名">
+                                </div>
+                                {% if is_admin_teacher %}
+                                <div class="col-md-3">
+                                    <label class="form-label">教师姓名</label>
+                                    <input type="text" class="form-control" name="teacher_name" id="teacherNameFilter" placeholder="输入教师姓名">
+                                </div>
+                                {% endif %}
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary" onclick="filterInternships()">
+                                        <i class="bi bi-search"></i> 筛选
+                                    </button>
+                                    <button type="button" class="btn btn-secondary ms-2" onclick="resetInternshipFilter()">
+                                        <i class="bi bi-x-circle"></i> 重置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>学生姓名</th>
+                                    <th>学号</th>
+                                    <th>实习单位</th>
+                                    <th>实习类型</th>
+                                    <th>开始日期</th>
+                                    <th>结束日期</th>
+                                    <th>实习成绩</th>
+                                    <th>是否优秀</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for internship in internships %}
+                                <tr>
+                                    <td>{{ internship.student_name }}</td>
+                                    <td>{{ internship.student_id }}</td>
+                                    <td>{{ internship.company_name }}</td>
+                                    <td>{{ internship.internship_type }}</td>
+                                    <td>{{ internship.start_date }}</td>
+                                    <td>{{ internship.end_date }}</td>
+                                    <td>{{ internship.internship_score }}</td>
+                                    <td>{{ '是' if internship.is_excellent_intern else '否' }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editInternship('{{ internship.id }}')">
+                                            <i class="bi bi-pencil"></i> 编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteInternship('{{ internship.id }}')">
+                                            <i class="bi bi-trash"></i> 删除
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 毕业设计标签页 -->
+                <div class="tab-pane fade" id="graduation" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>毕业设计</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addGraduationProjectModal">
+                            <i class="bi bi-plus-circle"></i> 添加毕业设计
+                        </button>
+                    </div>
+                    
+                    <!-- 添加筛选表单 -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form id="graduationFilterForm" class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">学生姓名</label>
+                                    <input type="text" class="form-control" name="student_name" id="studentNameFilter" placeholder="输入学生姓名">
+                                </div>
+                                {% if is_admin_teacher %}
+                                <div class="col-md-3">
+                                    <label class="form-label">教师姓名</label>
+                                    <input type="text" class="form-control" name="teacher_name" id="teacherNameFilter" placeholder="输入教师姓名">
+                                </div>
+                                {% endif %}
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary" onclick="filterGraduationProjects()">
+                                        <i class="bi bi-search"></i> 筛选
+                                    </button>
+                                    <button type="button" class="btn btn-secondary ms-2" onclick="resetGraduationFilter()">
+                                        <i class="bi bi-x-circle"></i> 重置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    {% if is_admin_teacher %}
+                                    <th>教师姓名</th>
+                                    {% endif %}
+                                    <th>学生姓名</th>
+                                    <th>毕业年份</th>
+                                    <th>专业</th>
+                                    <th>班级</th>
+                                    <th>课题名称</th>
+                                    <th>成绩</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in graduation_projects %}
+                                <tr>
+                                    {% if is_admin_teacher %}
+                                    <td>{{ project.teacher.name }}</td>
+                                    {% endif %}
+                                    <td>{{ project.student_name }}</td>
+                                    <td>{{ project.graduation_year }}</td>
+                                    <td>{{ project.major }}</td>
+                                    <td>{{ project.class_name }}</td>
+                                    <td>{{ project.project_title }}</td>
+                                    <td>{{ project.grade }}</td>
+                                    <td>
+                                        {% if is_admin_teacher or project.teacher_id == current_user.id %}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editGraduationProject({{ project.id }})">
+                                            <i class="bi bi-pencil"></i> 编辑
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteGraduationProject({{ project.id }})">
+                                            <i class="bi bi-trash"></i> 删除
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加课程模态框 -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCourseModalLabel">添加课程</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCourseForm">
+                    <div class="mb-3">
+                        <label class="form-label">课程名称</label>
+                        <input type="text" class="form-control" name="course_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">上课教室</label>
+                        <input type="text" class="form-control" name="classroom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">上课班级</label>
+                        <input type="text" class="form-control" name="class_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学期</label>
+                        <select class="form-select" name="semester" required>
+                            <option value="">请选择学期</option>
+                            <script>
+                                // 生成从2023年到2050年的学期选项
+                                for (let year = 2023; year <= 2050; year++) {
+                                    document.write(`<option value="${year}年春季">${year}年春季</option>`);
+                                    document.write(`<option value="${year}年冬季">${year}年冬季</option>`);
+                                }
+                            </script>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitCourse()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加实习模态框 -->
+<div class="modal fade" id="addInternshipModal" tabindex="-1" aria-labelledby="addInternshipModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addInternshipModalLabel">添加实习</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addInternshipForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <label class="form-label">学院</label>
+                            <input type="text" class="form-control" name="college" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">专业名称</label>
+                            <input type="text" class="form-control" name="major_name" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">专业性质</label>
+                            <select class="form-select" name="major_type">
+                                <option value="师范">师范</option>
+                                <option value="非师范">非师范</option>
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">班级</label>
+                            <input type="text" class="form-control" name="class_name" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">学号</label>
+                            <input type="text" class="form-control" name="student_id" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">学生姓名</label>
+                            <input type="text" class="form-control" name="student_name" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">性别</label>
+                            <select class="form-select" name="student_gender">
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                                <label class="form-label">联系方式</label>
+                                <input type="text" class="form-control" name="student_phone">
+                    </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <label class="form-label">实习类型</label>
+                            <select class="form-select" name="internship_type">
+                                <option value="基地">基地</option>
+                                <option value="自主">自主</option>
+                            </select>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">开始日期</label>
+                            <input type="date" class="form-control" name="start_date" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">结束日期</label>
+                            <input type="date" class="form-control" name="end_date" required>
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">实习单位</label>
+                            <input type="text" class="form-control" name="company_name" required>
+                        </div>
+                            <div class="mb-3">
+                                <label class="form-label">所属省份</label>
+                            <input type="text" class="form-control" name="province">
+                        </div>
+                            <div class="mb-3">
+                                <label class="form-label">所在城市</label>
+                            <input type="text" class="form-control" name="city">
+                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">详细地址</label>
+                        <input type="text" class="form-control" name="detailed_address">
+                    </div>
+                            <div class="mb-3">
+                                <label class="form-label">基地类型</label>
+                                <select class="form-select" name="base_type">
+                                    <option value="企业">企业</option>
+                                    <option value="教育">教育</option>
+                                </select>
+                        </div>
+                        </div>
+                        </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <label class="form-label">实习成绩</label>
+                                <input type="text" class="form-control" name="internship_score">
+                        </div>
+                            <div class="mb-3">
+                            <label class="form-label">是否优秀实习生</label>
+                            <select class="form-select" name="is_excellent_intern">
+                                <option value="false">否</option>
+                                <option value="true">是</option>
+                            </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">校外指导教师姓名</label>
+                                <input type="text" class="form-control" name="external_teacher_name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">校外指导教师职务</label>
+                                <input type="text" class="form-control" name="external_teacher_position">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">校外指导教师联系方式</label>
+                                <input type="text" class="form-control" name="external_teacher_phone">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitInternship()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加毕业设计模态框 -->
+<div class="modal fade" id="addGraduationProjectModal" tabindex="-1" aria-labelledby="addGraduationProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addGraduationProjectModalLabel">添加毕业设计</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addGraduationProjectForm">
+                    <div class="mb-3">
+                        <label class="form-label">毕业年份</label>
+                        <input type="number" class="form-control" name="graduation_year" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学生姓名</label>
+                        <input type="text" class="form-control" name="student_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学号</label>
+                        <input type="text" class="form-control" name="student_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">专业</label>
+                        <input type="text" class="form-control" name="major" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">班级</label>
+                        <input type="text" class="form-control" name="class_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">课题名称</label>
+                        <input type="text" class="form-control" name="project_title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">课题类型</label>
+                        <select class="form-select" name="project_type" required>
+                            <option value="设计">设计</option>
+                            <option value="论文">论文</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">成绩</label>
+                        <select class="form-select" name="grade" required>
+                            <option value="优秀">优秀</option>
+                            <option value="良好">良好</option>
+                            <option value="中等">中等</option>
+                            <option value="及格">及格</option>
+                            <option value="不及格">不及格</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitGraduationProject()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑实习模态框 -->
+<div class="modal fade" id="editInternshipModal" tabindex="-1" aria-labelledby="editInternshipModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInternshipModalLabel">编辑实习信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInternshipForm">
+                    <input type="hidden" id="editInternshipId" name="id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学院</label>
+                            <input type="text" class="form-control" id="editCollege" name="college" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">专业名称</label>
+                            <input type="text" class="form-control" id="editMajorName" name="major_name" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">专业性质</label>
+                            <select class="form-select" id="editMajorType" name="major_type" required>
+                                <option value="师范">师范</option>
+                                <option value="非师范">非师范</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">班级</label>
+                            <input type="text" class="form-control" id="editClassName" name="class_name" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学号</label>
+                            <input type="text" class="form-control" id="editStudentId" name="student_id" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">学生姓名</label>
+                            <input type="text" class="form-control" id="editStudentName" name="student_name" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">性别</label>
+                            <select class="form-select" id="editStudentGender" name="student_gender" required>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">联系方式</label>
+                            <input type="text" class="form-control" id="editStudentPhone" name="student_phone" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">实习类型</label>
+                            <select class="form-select" id="editInternshipType" name="internship_type" required>
+                                <option value="基地">基地</option>
+                                <option value="自主">自主</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">实习单位</label>
+                            <input type="text" class="form-control" id="editCompanyName" name="company_name" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="editStartDate" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="editEndDate" name="end_date" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">省份</label>
+                            <input type="text" class="form-control" id="editProvince" name="province" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">城市</label>
+                            <input type="text" class="form-control" id="editCity" name="city" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">详细地址</label>
+                            <input type="text" class="form-control" id="editDetailedAddress" name="detailed_address" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">基地类型</label>
+                            <select class="form-select" id="editBaseType" name="base_type" required>
+                                <option value="企业">企业</option>
+                                <option value="教育">教育</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">实习成绩</label>
+                            <input type="text" class="form-control" id="editInternshipScore" name="internship_score" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">是否优秀实习生</label>
+                            <select class="form-select" id="editIsExcellentIntern" name="is_excellent_intern" required>
+                                <option value="true">是</option>
+                                <option value="false">否</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">校外指导教师姓名</label>
+                            <input type="text" class="form-control" id="editExternalTeacherName" name="external_teacher_name" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">职务</label>
+                            <input type="text" class="form-control" id="editExternalTeacherPosition" name="external_teacher_position" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">联系方式</label>
+                            <input type="text" class="form-control" id="editExternalTeacherPhone" name="external_teacher_phone" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateInternship()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑课程模态框 -->
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCourseModalLabel">编辑课程</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCourseForm">
+                    <input type="hidden" id="editCourseId" name="id">
+                    <div class="mb-3">
+                        <label class="form-label">课程名称</label>
+                        <input type="text" class="form-control" id="editCourseName" name="course_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">上课教室</label>
+                        <input type="text" class="form-control" id="editClassroom" name="classroom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">上课班级</label>
+                        <input type="text" class="form-control" id="editClassName" name="class_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学期</label>
+                        <select class="form-select" id="editSemester" name="semester" required>
+                            <option value="">请选择学期</option>
+<script>
+                                // 生成从2023年到2050年的学期选项
+                                for (let year = 2023; year <= 2050; year++) {
+                                    document.write(`<option value="${year}年春季">${year}年春季</option>`);
+                                    document.write(`<option value="${year}年冬季">${year}年冬季</option>`);
+                                }
+                            </script>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateCourse()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const internshipManagement = {
+    formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    },
+
+    toDateInputValue: function(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    },
+
+    editInternship: function(id) {
+        fetch(`/api/internships/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const internship = data.internship;
+                document.getElementById('editInternshipId').value = internship.id;
+                document.getElementById('editCollege').value = internship.college;
+                document.getElementById('editMajorName').value = internship.major_name;
+                document.getElementById('editMajorType').value = internship.major_type;
+                document.getElementById('editClassName').value = internship.class_name;
+                document.getElementById('editStudentId').value = internship.student_id;
+                document.getElementById('editStudentName').value = internship.student_name;
+                document.getElementById('editStudentGender').value = internship.student_gender;
+                document.getElementById('editStudentPhone').value = internship.student_phone;
+                document.getElementById('editInternshipType').value = internship.internship_type;
+                document.getElementById('editCompanyName').value = internship.company_name;
+                document.getElementById('editStartDate').value = this.formatDate(internship.start_date);
+                document.getElementById('editEndDate').value = this.formatDate(internship.end_date);
+                document.getElementById('editProvince').value = internship.province;
+                document.getElementById('editCity').value = internship.city;
+                document.getElementById('editDetailedAddress').value = internship.detailed_address;
+                document.getElementById('editBaseType').value = internship.base_type;
+                document.getElementById('editInternshipScore').value = internship.internship_score;
+                document.getElementById('editIsExcellentIntern').value = internship.is_excellent_intern.toString();
+                document.getElementById('editExternalTeacherName').value = internship.external_teacher_name;
+                document.getElementById('editExternalTeacherPosition').value = internship.external_teacher_position;
+                document.getElementById('editExternalTeacherPhone').value = internship.external_teacher_phone;
+                
+                const modal = new bootstrap.Modal(document.getElementById('editInternshipModal'));
+                modal.show();
+            } else {
+                alert('获取实习信息失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('获取实习信息失败，请稍后重试');
+        });
+    },
+
+    submitInternship: function() {
+        const form = document.getElementById('addInternshipForm');
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key === 'is_excellent_intern') {
+                data[key] = value === 'true';
+            } else {
+                data[key] = value;
+            }
+        });
+
+        fetch('/api/internships', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('添加失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('添加失败：' + error);
+        });
+    },
+
+    updateInternship: function() {
+        const form = document.getElementById('editInternshipForm');
+        const formData = new FormData(form);
+        const id = formData.get('id');
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key === 'is_excellent_intern') {
+                data[key] = value === 'true';
+            } else {
+                data[key] = value;
+            }
+        });
+
+        fetch(`/api/internships/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('更新失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('更新失败：' + error);
+        });
+    },
+
+    deleteInternship: function(id) {
+        if (confirm('确定要删除这条实习记录吗？')) {
+            fetch(`/api/internships/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('删除失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('删除失败：' + error);
+            });
+        }
+    },
+
+    filterInternships: function() {
+        const form = document.getElementById('internshipFilterForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        formData.forEach((value, key) => {
+            if (value) params.append(key, value);
+        });
+        window.location.href = `/teacher_teaching?tab=internships&${params.toString()}`;
+    },
+
+    resetInternshipFilter: function() {
+        window.location.href = '/teacher_teaching?tab=internships';
+    },
+
+    filterGraduationProjects: function() {
+        const form = document.getElementById('graduationFilterForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+        formData.forEach((value, key) => {
+            if (value) params.append(key, value);
+        });
+        window.location.href = `/teacher_teaching?tab=graduation&${params.toString()}`;
+    },
+
+    resetGraduationFilter: function() {
+        window.location.href = '/teacher_teaching?tab=graduation';
+    },
+
+    submitGraduationProject: function() {
+        const form = document.getElementById('addGraduationProjectForm');
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        fetch('/api/graduation_projects', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('添加失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('添加失败：' + error);
+        });
+    },
+
+    editGraduationProject: function(id) {
+        fetch(`/api/graduation_projects/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const project = data.project;
+                document.getElementById('editGraduationProjectId').value = project.id;
+                document.getElementById('editGraduationYear').value = project.graduation_year;
+                document.getElementById('editStudentName').value = project.student_name;
+                document.getElementById('editStudentId').value = project.student_id;
+                document.getElementById('editMajor').value = project.major;
+                document.getElementById('editClassName').value = project.class_name;
+                document.getElementById('editProjectTitle').value = project.project_title;
+                document.getElementById('editProjectType').value = project.project_type;
+                document.getElementById('editGrade').value = project.grade;
+                
+                const modal = new bootstrap.Modal(document.getElementById('editGraduationProjectModal'));
+                modal.show();
+            } else {
+                alert('获取毕业设计信息失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('获取毕业设计信息失败，请稍后重试');
+        });
+    },
+
+    deleteGraduationProject: function(id) {
+        if (confirm('确定要删除这条毕业设计记录吗？')) {
+            fetch(`/api/graduation_projects/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('删除失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('删除失败：' + error);
+            });
+        }
+    },
+
+    filterCourses: function() {
+        const semester = document.getElementById('semesterFilter').value;
+        const courseName = document.getElementById('courseNameFilter').value;
+        const teacherName = document.getElementById('teacherNameFilter')?.value || '';
+        window.location.href = `/teacher_teaching?semester=${semester}&course_name=${courseName}&teacher_name=${teacherName}&tab=courses`;
+    },
+
+    resetFilter: function() {
+        document.getElementById('semesterFilter').value = '';
+        document.getElementById('courseNameFilter').value = '';
+        if (document.getElementById('teacherNameFilter')) {
+            document.getElementById('teacherNameFilter').value = '';
+        }
+        window.location.href = '/teacher_teaching?tab=courses';
+    },
+
+    submitCourse: function() {
+        const form = document.getElementById('addCourseForm');
+        const formData = new FormData(form);
+        const data = {
+            course_name: formData.get('course_name'),
+            classroom: formData.get('classroom'),
+            class_name: formData.get('class_name'),
+            semester: formData.get('semester')
+        };
+
+        fetch('/api/teacher/courses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('添加失败：' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('添加失败：' + error);
+        });
+    },
+
+    editCourse: function(id) {
+        // 获取课程信息
+        fetch(`/api/teacher/courses/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const course = data.course;
+                    // 填充表单
+                    setTimeout(() => {
+                        document.getElementById('editCourseId').value = course.id;
+                        document.getElementById('editCourseName').value = course.course_name || '';
+                        document.getElementById('editClassroom').value = course.classroom || '';
+                        document.getElementById('editClassName').value = course.class_name || '';
+                        document.getElementById('editSemester').value = course.semester || '';
+                    }, 100);
+                    // 显示模态框
+                    setTimeout(() => {
+                        const modal = new bootstrap.Modal(document.getElementById('editCourseModal'));
+                        modal.show();
+                    }, 100);  // 延迟100毫秒，让页面有时间渲染完成
+                } else {
+                    alert('获取课程信息失败：' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('获取课程信息失败：' + error);
+            });
+    },
+
+    updateCourse: function() {
+        const form = document.getElementById('editCourseForm');
+        const formData = new FormData(form);
+        const id = document.getElementById('editCourseId').value;
+        const data = {
+            course_name: formData.get('course_name'),
+            classroom: formData.get('classroom'),
+            class_name: formData.get('class_name'),
+            semester: formData.get('semester')
+        };
+        
+        fetch(`/api/teacher/courses/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('更新失败：' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('更新失败：' + error);
+        });
+    },
+
+    deleteCourse: function(id) {
+        if (confirm('确定要删除这条课程记录吗？')) {
+            fetch(`/api/teacher/courses/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('删除失败：' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('删除失败：' + error);
+            });
+        }
+    }
+};
+
+// 从URL获取当前tab
+function getCurrentTab() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mainTab = urlParams.get('main_tab') || 'regular-teaching';
+    const subTab = urlParams.get('sub_tab') || 'courses';
+    return { mainTab, subTab };
+}
+
+// 设置当前tab
+function setCurrentTab(mainTab, subTab) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('main_tab', mainTab);
+    url.searchParams.set('sub_tab', subTab);
+    window.history.pushState({}, '', url);
+}
+
+// 页面加载时激活正确的tab
+document.addEventListener('DOMContentLoaded', function() {
+    const { mainTab, subTab } = getCurrentTab();
+    
+    // 激活主标签页
+    const mainTabEl = document.querySelector(`#${mainTab}-tab`);
+    if (mainTabEl) {
+        const bsMainTab = new bootstrap.Tab(mainTabEl);
+        bsMainTab.show();
+    }
+
+    // 激活子标签页
+    const subTabEl = document.querySelector(`#${subTab}-tab`);
+    if (subTabEl) {
+        const bsSubTab = new bootstrap.Tab(subTabEl);
+        bsSubTab.show();
+    }
+
+    // 加载教学立项与教研成果数据
+    if (mainTab === 'teaching-research') {
+        loadTeachingProjects();
+        loadEvaluationProjects();
+        loadResearchPapers();
+    }
+
+    // 课程相关函数
+    window.filterCourses = internshipManagement.filterCourses;
+    window.resetFilter = internshipManagement.resetFilter;
+    window.submitCourse = internshipManagement.submitCourse;
+    window.editCourse = internshipManagement.editCourse;
+    window.updateCourse = internshipManagement.updateCourse;
+    window.deleteCourse = internshipManagement.deleteCourse;
+
+    // 实习相关函数
+    window.filterInternships = internshipManagement.filterInternships;
+    window.resetInternshipFilter = internshipManagement.resetInternshipFilter;
+    window.submitInternship = internshipManagement.submitInternship;
+    window.editInternship = internshipManagement.editInternship;
+    window.updateInternship = internshipManagement.updateInternship;
+    window.deleteInternship = internshipManagement.deleteInternship;
+
+    // 毕业设计相关函数
+    window.filterGraduationProjects = internshipManagement.filterGraduationProjects;
+    window.resetGraduationFilter = internshipManagement.resetGraduationFilter;
+    window.submitGraduationProject = internshipManagement.submitGraduationProject;
+    window.editGraduationProject = internshipManagement.editGraduationProject;
+    window.deleteGraduationProject = internshipManagement.deleteGraduationProject;
+
+    // 加载教务处项目数据
+    function loadTeachingProjects() {
+        $.get('/api/teaching_projects', function(response) {
+            if (response.code === 200) {
+                const tbody = $('#teachingProjectsTable');
+                tbody.empty();
+                response.data.forEach(project => {
+                    tbody.append(`
+                        <tr>
+                            <td>${project.project_type}</td>
+                            <td>${project.project_name}</td>
+                            <td>${project.project_level || ''}</td>
+                            <td>${project.approval_date || ''}</td>
+                            <td>${project.completion_date || ''}</td>
+                            <td>${project.status}</td>
+                            <td>
+                                ${project.attachment_path ? 
+                                `<a href="/download/${project.attachment_path}" target="_blank">查看附件</a>` : 
+                                '无'}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteTeachingProject(${project.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+        });
+    }
+
+    // 加载评估中心项目数据
+    function loadEvaluationProjects() {
+        $.get('/api/evaluation_projects', function(response) {
+            if (response.code === 200) {
+                const tbody = $('#evaluationProjectsTable');
+                tbody.empty();
+                response.data.forEach(project => {
+                    tbody.append(`
+                        <tr>
+                            <td>${project.project_type}</td>
+                            <td>${project.project_name}</td>
+                            <td>${project.project_level || ''}</td>
+                            <td>${project.is_completed ? '是' : '否'}</td>
+                            <td>${project.completion_date || ''}</td>
+                            <td>
+                                ${project.attachment_path ? 
+                                `<a href="/download/${project.attachment_path}" target="_blank">查看附件</a>` : 
+                                '无'}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEvaluationProject(${project.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+        });
+    }
+
+    // 加载教研论文数据
+    function loadResearchPapers() {
+        $.get('/api/research_papers', function(response) {
+            if (response.code === 200) {
+                const tbody = $('#researchPapersTable');
+                tbody.empty();
+                response.data.forEach(paper => {
+                    tbody.append(`
+                        <tr>
+                            <td>${paper.title}</td>
+                            <td>${paper.journal || ''}</td>
+                            <td>${paper.publish_date || ''}</td>
+                            <td>${paper.authors || ''}</td>
+                            <td>
+                                ${paper.attachment_path ? 
+                                `<a href="/download/${paper.attachment_path}" target="_blank">查看附件</a>` : 
+                                '无'}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteResearchPaper(${paper.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+        });
+    }
+
+    // 监听主标签页切换事件
+    document.querySelectorAll('#mainTabs button[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(event) {
+            const mainTabId = event.target.id.replace('-tab', '');
+            const subTabId = mainTabId === 'regular-teaching' ? 'courses' : 'teaching-projects';
+            setCurrentTab(mainTabId, subTabId);
+            
+            // 如果切换到教学立项与教研成果标签页，加载相关数据
+            if (mainTabId === 'teaching-research') {
+                loadTeachingProjects();
+                loadEvaluationProjects();
+                loadResearchPapers();
+            }
+        });
+    });
+
+    // 监听子标签页切换事件
+    document.querySelectorAll('#teachingTabs button[data-bs-toggle="pill"], #researchTabs button[data-bs-toggle="pill"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(event) {
+            const mainTabId = event.target.closest('.tab-pane').id;
+            const subTabId = event.target.id.replace('-tab', '');
+            setCurrentTab(mainTabId, subTabId);
+        });
+    });
+
+    // 修改保存成功后的回调函数
+    function handleSaveSuccess(mainTab, subTab) {
+        // 刷新页面时保持在当前tab
+        window.location.href = `/teacher_teaching?main_tab=${mainTab}&sub_tab=${subTab}`;
+    }
+});
+</script>
+{% endblock %} 

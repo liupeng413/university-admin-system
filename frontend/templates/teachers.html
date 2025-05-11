@@ -37,7 +37,7 @@
                             <td>{{ teacher.birth_date.strftime('%Y-%m-%d') if teacher.birth_date else '暂无' }}</td>
                             <td>{{ teacher.work_start_date.strftime('%Y-%m-%d') if teacher.work_start_date else '暂无' }}</td>
                             <td>{{ teacher.major }}</td>
-                            <td>{{ teacher.title }}</td>
+                            <td>{{ teacher.highest_title }}</td>
                             <td class="text-end">
                                 <a href="{{ url_for('view_teacher', id=teacher.id) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-eye"></i> 查看
@@ -70,31 +70,31 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="filterForm" action="{{ url_for('teachers') }}" method="get">
                     <div class="mb-3">
                         <label class="form-label">专业</label>
-                        <select class="form-select">
+                        <select class="form-select" name="major">
                             <option value="">全部</option>
-                            <option>计算机科学与技术</option>
-                            <option>软件工程</option>
-                            <option>人工智能</option>
+                            <option value="计算机科学与技术" {{ 'selected' if request.args.get('major') == '计算机科学与技术' else '' }}>计算机科学与技术</option>
+                            <option value="软件工程" {{ 'selected' if request.args.get('major') == '软件工程' else '' }}>软件工程</option>
+                            <option value="人工智能" {{ 'selected' if request.args.get('major') == '人工智能' else '' }}>人工智能</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">职称</label>
-                        <select class="form-select">
+                        <select class="form-select" name="highest_title">
                             <option value="">全部</option>
-                            <option>教授</option>
-                            <option>副教授</option>
-                            <option>讲师</option>
-                            <option>助教</option>
+                            <option value="教授" {{ 'selected' if request.args.get('highest_title') == '教授' else '' }}>教授</option>
+                            <option value="副教授" {{ 'selected' if request.args.get('highest_title') == '副教授' else '' }}>副教授</option>
+                            <option value="讲师" {{ 'selected' if request.args.get('highest_title') == '讲师' else '' }}>讲师</option>
+                            <option value="助教" {{ 'selected' if request.args.get('highest_title') == '助教' else '' }}>助教</option>
                         </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-danger">应用筛选</button>
+                <button type="submit" form="filterForm" class="btn btn-danger">应用筛选</button>
             </div>
         </div>
     </div>

@@ -1,202 +1,366 @@
 {% extends "base.html" %}
 
+{% block title %}教师数据统计分析{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
+<div class="container mt-4">
+    <h2 class="mb-4">教师数据统计分析</h2>
+    
+    <div class="row">
+        <!-- 年龄结构 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
                 <div class="card-header">
-                    <h2 class="mb-0 text-primary-color">教师统计数据</h2>
+                    <h5 class="card-title">年龄结构</h5>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        当前共有 {{ total_teachers }} 名教师
-                    </div>
+                    <canvas id="ageChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 学历结构 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">学历结构</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="educationChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 职称结构 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">职称结构</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="titleChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 双师结构 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">双师结构</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="doubleTeacherChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 性别结构 -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">性别结构</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="genderChart" height="300"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- 职称分布 -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">职称分布</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="titleChart"></canvas>
-                </div>
+    <!-- 教师列表部分 - 只对特定用户显示 -->
+    {% if current_user.username in ['zhangyanpeng', 'wangpeng'] %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title">教师个人信息列表</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>工号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>职称</th>
+                            <th>学历</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td>{{ teacher.employee_id }}</td>
+                            <td>{{ teacher.name }}</td>
+                            <td>{{ teacher.gender }}</td>
+                            <td>{{ teacher.title }}</td>
+                            <td>{{ teacher.education }}</td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" 
+                                        onclick="showTeacherDetails('{{ teacher.employee_id }}')"
+                                        data-bs-toggle="modal" data-bs-target="#teacherDetailModal">
+                                    查看详情
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
+    {% endif %}
+</div>
 
-        <!-- 性别分布 -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">性别分布</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="genderChart"></canvas>
+<!-- 教师详情模态框 -->
+{% if current_user.username in ['zhangyanpeng', 'wangpeng'] %}
+<div class="modal fade" id="teacherDetailModal" tabindex="-1" aria-labelledby="teacherDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="teacherDetailModalLabel">教师详细信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="teacherDetailContent">
+                    <!-- 详细信息将通过JavaScript动态加载 -->
                 </div>
             </div>
-        </div>
-
-        <!-- 年龄分布 -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">年龄分布</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="ageChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- 工作年限分布 -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">工作年限分布</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="workYearsChart"></canvas>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>
 </div>
+{% endif %}
 
-<!-- 引入 Chart.js -->
+<form method="POST" action="{{ url_for('get_teacher_statistics') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-// 设置图表颜色
-const colors = [
-    'rgba(255, 99, 132, 0.8)',
-    'rgba(54, 162, 235, 0.8)',
-    'rgba(255, 206, 86, 0.8)',
-    'rgba(75, 192, 192, 0.8)',
-    'rgba(153, 102, 255, 0.8)'
-];
-
-// 职称分布图表
-const titleData = {
-    labels: {{ title_stats | map(attribute=0) | list | tojson }},
-    data: {{ title_stats | map(attribute=1) | list | tojson }}
-};
-
-new Chart(document.getElementById('titleChart'), {
-    type: 'pie',
-    data: {
-        labels: titleData.labels,
-        datasets: [{
-            data: titleData.data,
-            backgroundColor: colors
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
+// 统一样式配置
+const commonChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: {
+                font: {
+                    size: 12
+                }
             }
         }
     }
-});
-
-// 性别分布图表
-const genderData = {
-    labels: {{ gender_stats | map(attribute=0) | list | tojson }},
-    data: {{ gender_stats | map(attribute=1) | list | tojson }}
 };
 
-new Chart(document.getElementById('genderChart'), {
-    type: 'doughnut',
-    data: {
-        labels: genderData.labels,
-        datasets: [{
-            data: genderData.data,
-            backgroundColor: colors
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
-
-// 年龄分布图表
-const ageData = {
-    labels: {{ age_ranges.keys() | list | tojson }},
-    data: {{ age_ranges.values() | list | tojson }}
-};
-
-new Chart(document.getElementById('ageChart'), {
-    type: 'bar',
-    data: {
-        labels: ageData.labels,
-        datasets: [{
-            label: '人数',
-            data: ageData.data,
-            backgroundColor: colors[0]
-        }]
-    },
-    options: {
-        responsive: true,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
+// 柱状图通用配置
+const barChartOptions = {
+    ...commonChartOptions,
+    scales: {
+        y: {
+            beginAtZero: true,
+            ticks: {
+                font: {
+                    size: 12
                 }
             }
         },
-        plugins: {
-            legend: {
-                display: false
-            }
-        }
-    }
-});
-
-// 工作年限分布图表
-const workYearsData = {
-    labels: {{ work_years_ranges.keys() | list | tojson }},
-    data: {{ work_years_ranges.values() | list | tojson }}
-};
-
-new Chart(document.getElementById('workYearsChart'), {
-    type: 'bar',
-    data: {
-        labels: workYearsData.labels,
-        datasets: [{
-            label: '人数',
-            data: workYearsData.data,
-            backgroundColor: colors[1]
-        }]
-    },
-    options: {
-        responsive: true,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
+        x: {
+            ticks: {
+                font: {
+                    size: 12
                 }
             }
-        },
-        plugins: {
-            legend: {
-                display: false
+        }
+    }
+};
+
+// 饼图通用配置
+const pieChartOptions = {
+    ...commonChartOptions,
+    plugins: {
+        ...commonChartOptions.plugins,
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    const label = context.label || '';
+                    const value = context.raw || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return `${label}: ${value} (${percentage}%)`;
+                }
             }
         }
     }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取统计数据
+    fetch('/api/teacher/statistics')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const stats = data.data;
+                
+                // 年龄结构柱状图
+                new Chart(document.getElementById('ageChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: stats.age_structure.labels,
+                        datasets: [{
+                            label: '人数',
+                            data: stats.age_structure.values,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: barChartOptions
+                });
+                
+                // 学历结构饼图
+                new Chart(document.getElementById('educationChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: stats.education_structure.labels,
+                        datasets: [{
+                            data: stats.education_structure.values,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: pieChartOptions
+                });
+                
+                // 职称结构柱状图
+                new Chart(document.getElementById('titleChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: stats.title_structure.labels,
+                        datasets: [{
+                            label: '人数',
+                            data: stats.title_structure.values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: barChartOptions
+                });
+                
+                // 双师结构饼图
+                new Chart(document.getElementById('doubleTeacherChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: stats.dual_teacher_structure.labels,
+                        datasets: [{
+                            data: stats.dual_teacher_structure.values,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: pieChartOptions
+                });
+                
+                // 性别结构饼图
+                new Chart(document.getElementById('genderChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: stats.gender_structure.labels,
+                        datasets: [{
+                            data: stats.gender_structure.values,
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 99, 132, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: pieChartOptions
+                });
+            } else {
+                console.error('数据获取失败:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
 });
+
+{% if current_user.username in ['zhangyanpeng', 'wangpeng'] %}
+// 获取教师详细信息
+function showTeacherDetails(employeeId) {
+    fetch(`/api/teacher/details/${employeeId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const teacher = data.data;
+                let detailHtml = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>基本信息</h6>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>工号</th>
+                                    <td>${teacher.employee_id}</td>
+                                </tr>
+                                <tr>
+                                    <th>姓名</th>
+                                    <td>${teacher.name}</td>
+                                </tr>
+                                <tr>
+                                    <th>性别</th>
+                                    <td>${teacher.gender}</td>
+                                </tr>
+                                <tr>
+                                    <th>出生年月</th>
+                                    <td>${teacher.birth_date}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>教育与职称信息</h6>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>学历</th>
+                                    <td>${teacher.education}</td>
+                                </tr>
+                                <tr>
+                                    <th>职称</th>
+                                    <td>${teacher.title}</td>
+                                </tr>
+                                <tr>
+                                    <th>所属系部</th>
+                                    <td>${teacher.department}</td>
+                                </tr>
+                                <tr>
+                                    <th>双师类型</th>
+                                    <td>${teacher.dual_teacher_type || '无'}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('teacherDetailContent').innerHTML = detailHtml;
+            } else {
+                alert('获取教师信息失败');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('获取教师信息失败');
+        });
+}
+{% endif %}
 </script>
 {% endblock %} 

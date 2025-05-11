@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>五业导师</h2>
+    
+    <!-- 添加记录按钮 -->
+    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+        添加学生信息
+    </button>
+    
+    <!-- 审核按钮（仅特定用户可见） -->
+    {% if current_user.username in ['张艳鹏', '王鹏'] %}
+    <button type="button" class="btn btn-success mb-3 ms-2" id="reviewBtn" style="display: none;">
+        批量审核
+    </button>
+    {% endif %}
+    
+    <!-- 记录表格 -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    {% if current_user.username in ['张艳鹏', '王鹏'] %}
+                    <th><input type="checkbox" id="selectAll"></th>
+                    {% endif %}
+                    <th>学生照片</th>
+                    <th>学生姓名</th>
+                    <th>学号</th>
+                    <th>班级</th>
+                    <th>指导教师</th>
+                    <th>状态</th>
+                    <th>审核意见</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="recordsTable">
+                <!-- 记录将通过JavaScript动态加载 -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 添加记录模态框 -->
+<div class="modal fade" id="addRecordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加学生信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRecordForm">
+                    <div class="mb-3">
+                        <label class="form-label">学生照片</label>
+                        <input type="file" class="form-control" name="photo" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学生姓名</label>
+                        <input type="text" class="form-control" name="student_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">学号</label>
+                        <input type="text" class="form-control" name="student_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">班级</label>
+                        <input type="text" class="form-control" name="class_name" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="submitRecord">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 审核模态框 -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">批量审核</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <div class="mb-3">
+                        <label class="form-label">审核结果</label>
+                        <select class="form-select" name="status" required>
+                            <option value="approved">合格</option>
+                            <option value="rejected">限期整改</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">审核意见</label>
+                        <textarea class="form-control" name="comment" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="submitReview">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 在脚本开始处定义updateSelectAllState函数
+function updateSelectAllState() {
+    const selectAll = document.getElementById('selectAll');
+    const reviewBtn = document.getElementById('reviewBtn');
+    
+    // 只在管理员界面执行相关操作
+    if (selectAll && reviewBtn) {
+        const checkboxes = document.querySelectorAll('.record-checkbox');
+        if (checkboxes.length > 0) {
+            selectAll.checked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+            reviewBtn.style.display = 'inline-block';
+        } else {
+            reviewBtn.style.display = 'none';
+        }
+    }
+}
+
+// 加载记录
+function loadRecords() {
+    const tbody = document.getElementById('recordsTable');
+    if (!tbody) {
+        console.error('找不到记录表格元素');
+        return;
+    }
+
+    fetch('/api/five_one_mentor/records')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(records => {
+            tbody.innerHTML = '';
+            
+            if (!Array.isArray(records)) {
+                console.error('返回的数据格式不正确');
+                return;
+            }
+            
+            records.forEach(record => {
+                const tr = document.createElement('tr');
+                let html = '';
+                
+                {% if current_user.username in ['张艳鹏', '王鹏'] %}
+                html += `<td><input type="checkbox" class="record-checkbox" value="${record.id}"></td>`;
+                {% endif %}
+                
+                html += `
+                    <td>
+                        ${record.photo_path ? 
+                            `<img src="/uploads/${record.photo_path}" class="student-photo" style="width: 50px; height: 50px; object-fit: cover;">` : 
+                            '无照片'}
+                    </td>
+                    <td>${record.student_name || ''}</td>
+                    <td>${record.student_id || ''}</td>
+                    <td>${record.class_name || ''}</td>
+                    <td>${record.teacher_name || '${current_user.name}'}</td>
+                    <td>
+                        <span class="badge ${record.status === 'approved' ? 'bg-success' : 
+                                         record.status === 'rejected' ? 'bg-danger' : 'bg-warning'}">
+                            ${record.status === 'approved' ? '合格' : 
+                              record.status === 'rejected' ? '限期整改' : '待审核'}
+                        </span>
+                    </td>
+                    <td>${record.review_comment || '-'}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm delete-record" data-id="${record.id}">删除</button>
+                    </td>
+                `;
+                tr.innerHTML = html;
+                tbody.appendChild(tr);
+            });
+            
+            // 添加删除事件监听
+            document.querySelectorAll('.delete-record').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('确定要删除这条记录吗？')) {
+                        const id = this.dataset.id;
+                        fetch(`/api/five_one_mentor/records/${id}`, {
+                            method: 'DELETE'
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.error) {
+                                throw new Error(data.error);
+                            }
+                            // 删除成功后重新加载数据
+                            window.location.reload();
+                        })
+                        .catch(error => {
+                            console.error('删除失败:', error);
+                            alert('删除失败：' + error.message);
+                        });
+                    }
+                });
+            });
+            
+            // 更新全选状态
+            updateSelectAllState();
+        })
+        .catch(error => {
+            console.error('加载记录失败:', error);
+            alert('加载记录失败：' + error.message);
+        });
+}
+
+// 添加记录
+document.getElementById('submitRecord').addEventListener('click', function() {
+    const form = document.getElementById('addRecordForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/five_one_mentor/records', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            $('#addRecordModal').modal('hide');
+            form.reset();
+            loadRecords();
+        }
+    })
+    .catch(error => alert('添加失败：' + error));
+});
+
+{% if current_user.username in ['张艳鹏', '王鹏'] %}
+// 批量审核
+document.getElementById('reviewBtn').addEventListener('click', function() {
+    const selectedIds = Array.from(document.querySelectorAll('.record-checkbox:checked'))
+        .map(checkbox => parseInt(checkbox.value));
+        
+    if (selectedIds.length === 0) {
+        alert('请选择要审核的记录');
+        return;
+    }
+    
+    $('#reviewModal').modal('show');
+});
+
+document.getElementById('submitReview').addEventListener('click', function() {
+    const form = document.getElementById('reviewForm');
+    const selectedIds = Array.from(document.querySelectorAll('.record-checkbox:checked'))
+        .map(checkbox => parseInt(checkbox.value));
+        
+    fetch('/api/five_one_mentor/records/review', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            record_ids: selectedIds,
+            status: form.status.value,
+            comment: form.comment.value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            $('#reviewModal').modal('hide');
+            form.reset();
+            loadRecords();
+        }
+    })
+    .catch(error => alert('审核失败：' + error));
+});
+
+// 全选功能
+document.getElementById('selectAll').addEventListener('change', function() {
+    document.querySelectorAll('.record-checkbox').forEach(checkbox => {
+        checkbox.checked = this.checked;
+    });
+    updateSelectAllState();
+});
+{% endif %}
+
+// 页面加载时加载记录
+document.addEventListener('DOMContentLoaded', loadRecords);
+</script>
+{% endblock %} 

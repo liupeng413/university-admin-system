@@ -10,9 +10,10 @@
                 </div>
                 <div class="card-body">
                     <form method="post" action="{{ url_for('login') }}" autocomplete="off">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group mb-3">
                             <label for="username" class="form-label">用户名</label>
-                            <input type="text" class="form-control" id="username" name="username" required placeholder="请输入姓名拼音(小写无空格)">
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="请输入姓名">
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">密码</label>

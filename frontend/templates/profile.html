@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- 添加提示消息容器 -->
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3" role="alert" id="successAlert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
 {% macro format_date(date) %}
     {% if date %}
         {{ date.strftime('%Y-%m-%d') }}
@@ -17,243 +28,292 @@
     {% endif %}
 {% endmacro %}
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
                     <form method="POST" enctype="multipart/form-data" onsubmit="return submitForm(this);">
-                        <!-- 基本信息 -->
-                        <div class="mb-4">
-                            <h5>基本信息</h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">姓名</label>
-                                    <input type="text" class="form-control" name="name" placeholder="待添加" value="{{ current_user.name if current_user.name and current_user.name != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">工号</label>
-                                    <input type="text" class="form-control" name="employee_number" placeholder="待添加" value="{{ current_user.employee_number if current_user.employee_number and current_user.employee_number != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">性别</label>
-                                    <select class="form-select" name="gender">
-                                        <option value="">请选择</option>
-                                        <option value="男" {% if current_user.gender == '男' %}selected{% endif %}>男</option>
-                                        <option value="女" {% if current_user.gender == '女' %}selected{% endif %}>女</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">民族</label>
-                                    <input type="text" class="form-control" name="ethnicity" placeholder="待添加" value="{{ current_user.ethnicity if current_user.ethnicity and current_user.ethnicity != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">出生日期</label>
-                                    <div class="input-group">
-                                        <input type="date" class="form-control" name="birth_date" value="{{ current_user.birth_date.strftime('%Y-%m-%d') if current_user.birth_date else '' }}" onchange="calculateAge(this)">
-                                        <span class="input-group-text" id="age-display">{% if current_user.birth_date %}{{ current_user.age }}岁{% else %}待添加{% endif %}</span>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="row">
+                            <!-- 左侧表单区域 -->
+                            <div class="col-md-9 pe-4 border-end">
+                                <!-- 基本信息 -->
+                                <div class="mb-5 module-basic">
+                                    <h5 class="border-bottom pb-2 mb-4" style="color: #666;">
+                                        <i class="fas fa-user-circle me-2"></i>基本信息
+                                    </h5>
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label">姓名</label>
+                                            <input type="text" class="form-control" name="name" placeholder="待添加" value="{{ current_user.name if current_user.name and current_user.name != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">工号</label>
+                                            <input type="text" class="form-control" name="employee_number" placeholder="待添加" value="{{ current_user.employee_number if current_user.employee_number is not none else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">性别</label>
+                                            <select class="form-select" name="gender">
+                                                <option value="">请选择</option>
+                                                <option value="男" {% if current_user.gender == '男' %}selected{% endif %}>男</option>
+                                                <option value="女" {% if current_user.gender == '女' %}selected{% endif %}>女</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">民族</label>
+                                            <input type="text" class="form-control" name="ethnicity" placeholder="待添加" value="{{ current_user.ethnicity if current_user.ethnicity and current_user.ethnicity != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">出生日期</label>
+                                            <div class="input-group">
+                                                <input type="date" class="form-control" name="birth_date" value="{{ current_user.birth_date.strftime('%Y-%m-%d') if current_user.birth_date else '' }}" onchange="calculateAge(this)">
+                                                <span class="input-group-text" id="age-display">{% if current_user.birth_date %}{{ current_user.age }}岁{% else %}待添加{% endif %}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">身份证号</label>
+                                            <input type="text" class="form-control" name="id_number" placeholder="待添加" value="{{ current_user.id_number if current_user.id_number and current_user.id_number != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">政治面貌</label>
+                                            <select class="form-select" name="political_status" id="political_status" onchange="togglePartyFields()">
+                                                <option value="">请选择</option>
+                                                <option value="中共党员" {% if current_user.political_status == '中共党员' %}selected{% endif %}>中共党员</option>
+                                                <option value="中共预备党员" {% if current_user.political_status == '中共预备党员' %}selected{% endif %}>中共预备党员</option>
+                                                <option value="共青团员" {% if current_user.political_status == '共青团员' %}selected{% endif %}>共青团员</option>
+                                                <option value="群众" {% if current_user.political_status == '群众' %}selected{% endif %}>群众</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6" id="party_join_date_group" style="display: {% if current_user.political_status in ['中共党员', '中共预备党员'] %}block{% else %}none{% endif %};">
+                                            <label class="form-label">入党时间</label>
+                                            <input type="date" class="form-control" name="party_join_date" value="{{ current_user.party_join_date.strftime('%Y-%m-%d') if current_user.party_join_date else '' }}">
+                                        </div>
+                                        <div class="col-md-6" id="party_branch_group" style="display: {% if current_user.political_status in ['中共党员', '中共预备党员'] %}block{% else %}none{% endif %};">
+                                            <label class="form-label">所属党支部</label>
+                                            <select class="form-select" name="party_branch">
+                                                <option value="">请选择</option>
+                                                <option value="中共绥化学院信息工程学院数学教师支部委员会" {% if current_user.party_branch == '中共绥化学院信息工程学院数学教师支部委员会' %}selected{% endif %}>中共绥化学院信息工程学院数学教师支部委员会</option>
+                                                <option value="中共绥化学院信息工程学院计算机教师支部委员会" {% if current_user.party_branch == '中共绥化学院信息工程学院计算机教师支部委员会' %}selected{% endif %}>中共绥化学院信息工程学院计算机教师支部委员会</option>
+                                                <option value="中共绥化学院信息工程学院行政支部委员会" {% if current_user.party_branch == '中共绥化学院信息工程学院行政支部委员会' %}selected{% endif %}>中共绥化学院信息工程学院行政支部委员会</option>
+                                                <option value="中共绥化学院信息工程学院第一学生支部委员会" {% if current_user.party_branch == '中共绥化学院信息工程学院第一学生支部委员会' %}selected{% endif %}>中共绥化学院信息工程学院第一学生支部委员会</option>
+                                                <option value="中共绥化学院信息工程学院第二学生支部委员会" {% if current_user.party_branch == '中共绥化学院信息工程学院第二学生支部委员会' %}selected{% endif %}>中共绥化学院信息工程学院第二学生支部委员会</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">籍贯</label>
+                                            <input type="text" class="form-control" name="hometown" placeholder="待添加" value="{{ current_user.hometown if current_user.hometown and current_user.hometown != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">联系电话</label>
+                                            <input type="tel" class="form-control" name="phone" placeholder="待添加" value="{{ current_user.phone if current_user.phone and current_user.phone != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">电子邮箱</label>
+                                            <input type="email" class="form-control" name="email" placeholder="待添加" value="{{ current_user.email if current_user.email and current_user.email != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">家庭住址</label>
+                                            <input type="text" class="form-control" name="address" placeholder="待添加" value="{{ current_user.address if current_user.address and current_user.address != 'None' else '' }}">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">身份证号</label>
-                                    <input type="text" class="form-control" name="id_number" placeholder="待添加" value="{{ current_user.id_number if current_user.id_number and current_user.id_number != 'None' else '' }}">
+
+                                <!-- 教育背景 -->
+                                <div class="mb-5 module-education">
+                                    <h5 class="border-bottom pb-2 mb-4" style="color: #666;">
+                                        <i class="fas fa-graduation-cap me-2"></i>教育背景
+                                    </h5>
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label">学历</label>
+                                            <select class="form-select" name="education_level">
+                                                <option value="">请选择</option>
+                                                <option value="博士" {% if current_user.education_level == '博士' %}selected{% endif %}>博士</option>
+                                                <option value="硕士" {% if current_user.education_level == '硕士' %}selected{% endif %}>硕士</option>
+                                                <option value="本科" {% if current_user.education_level == '本科' %}selected{% endif %}>本科</option>
+                                                <option value="专科" {% if current_user.education_level == '专科' %}selected{% endif %}>专科</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">学位</label>
+                                            <select class="form-select" name="degree">
+                                                <option value="">请选择</option>
+                                                <option value="博士" {% if current_user.degree == '博士' %}selected{% endif %}>博士</option>
+                                                <option value="硕士" {% if current_user.degree == '硕士' %}selected{% endif %}>硕士</option>
+                                                <option value="学士" {% if current_user.degree == '学士' %}selected{% endif %}>学士</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">获得学历时间</label>
+                                            <input type="date" class="form-control" name="education_date" value="{{ current_user.education_date.strftime('%Y-%m-%d') if current_user.education_date else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">获得学位时间</label>
+                                            <input type="date" class="form-control" name="degree_date" value="{{ current_user.degree_date.strftime('%Y-%m-%d') if current_user.degree_date else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">本科毕业学校</label>
+                                            <input type="text" class="form-control" name="bachelor_school" placeholder="待添加" value="{{ current_user.bachelor_school if current_user.bachelor_school and current_user.bachelor_school != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">硕士毕业学校</label>
+                                            <input type="text" class="form-control" name="master_school" placeholder="待添加" value="{{ current_user.master_school if current_user.master_school and current_user.master_school != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">博士毕业学校</label>
+                                            <input type="text" class="form-control" name="phd_school" placeholder="待添加" value="{{ current_user.phd_school if current_user.phd_school and current_user.phd_school != 'None' else '' }}">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">政治面貌</label>
-                                    <select class="form-select" name="political_status" onchange="handlePoliticalStatusChange(this)">
-                                        <option value="">请选择</option>
-                                        <option value="中共党员" {% if current_user.political_status == '中共党员' %}selected{% endif %}>中共党员</option>
-                                        <option value="中共预备党员" {% if current_user.political_status == '中共预备党员' %}selected{% endif %}>中共预备党员</option>
-                                        <option value="共青团员" {% if current_user.political_status == '共青团员' %}selected{% endif %}>共青团员</option>
-                                        <option value="民革党员" {% if current_user.political_status == '民革党员' %}selected{% endif %}>民革党员</option>
-                                        <option value="民盟盟员" {% if current_user.political_status == '民盟盟员' %}selected{% endif %}>民盟盟员</option>
-                                        <option value="民建会员" {% if current_user.political_status == '民建会员' %}selected{% endif %}>民建会员</option>
-                                        <option value="民进会员" {% if current_user.political_status == '民进会员' %}selected{% endif %}>民进会员</option>
-                                        <option value="农工党党员" {% if current_user.political_status == '农工党党员' %}selected{% endif %}>农工党党员</option>
-                                        <option value="致公党党员" {% if current_user.political_status == '致公党党员' %}selected{% endif %}>致公党党员</option>
-                                        <option value="九三学社社员" {% if current_user.political_status == '九三学社社员' %}selected{% endif %}>九三学社社员</option>
-                                        <option value="台盟盟员" {% if current_user.political_status == '台盟盟员' %}selected{% endif %}>台盟盟员</option>
-                                        <option value="无党派人士" {% if current_user.political_status == '无党派人士' %}selected{% endif %}>无党派人士</option>
-                                        <option value="群众" {% if current_user.political_status == '群众' %}selected{% endif %}>群众</option>
-                                    </select>
+
+                                <!-- 工作信息 -->
+                                <div class="mb-5 module-work">
+                                    <h5 class="border-bottom pb-2 mb-4" style="color: #666;">
+                                        <i class="fas fa-briefcase me-2"></i>工作信息
+                                    </h5>
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label">专业</label>
+                                            <select class="form-select" name="major">
+                                                <option value="">请选择</option>
+                                                <option value="数学与应用数学(师范类)" {% if current_user.major == '数学与应用数学(师范类)' %}selected{% endif %}>数学与应用数学(师范类)</option>
+                                                <option value="计算机科学与技术" {% if current_user.major == '计算机科学与技术' %}selected{% endif %}>计算机科学与技术</option>
+                                                <option value="软件工程" {% if current_user.major == '软件工程' %}selected{% endif %}>软件工程</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">所属教研室</label>
+                                            <select class="form-select" name="teaching_group">
+                                                <option value="">请选择</option>
+                                                <option value="基础数学教研室" {% if current_user.teaching_group == '基础数学教研室' %}selected{% endif %}>基础数学教研室</option>
+                                                <option value="应用数学教研室" {% if current_user.teaching_group == '应用数学教研室' %}selected{% endif %}>应用数学教研室</option>
+                                                <option value="计算机技术应用教研室" {% if current_user.teaching_group == '计算机技术应用教研室' %}selected{% endif %}>计算机技术应用教研室</option>
+                                                <option value="软件工程技术应用教研室" {% if current_user.teaching_group == '软件工程技术应用教研室' %}selected{% endif %}>软件工程技术应用教研室</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">是否双师</label>
+                                            <select class="form-select" name="is_dual_teacher">
+                                                <option value="">请选择</option>
+                                                <option value="是" {% if current_user.is_dual_teacher == '是' %}selected{% endif %}>是</option>
+                                                <option value="否" {% if current_user.is_dual_teacher == '否' %}selected{% endif %}>否</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">获得奖励称号</label>
+                                            <input type="text" class="form-control" name="award_title" placeholder="待添加" value="{{ current_user.award_title if current_user.award_title and current_user.award_title != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">人才称号</label>
+                                            <input type="text" class="form-control" name="talent_title" placeholder="待添加" value="{{ current_user.talent_title if current_user.talent_title and current_user.talent_title != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">研究方向</label>
+                                            <input type="text" class="form-control" name="research_direction" placeholder="待添加" value="{{ current_user.research_direction if current_user.research_direction and current_user.research_direction != 'None' else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">入校时间</label>
+                                            <input type="date" class="form-control" name="work_start_date" value="{{ current_user.work_start_date.strftime('%Y-%m-%d') if current_user.work_start_date else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">参加工作时间</label>
+                                            <input type="date" class="form-control" name="career_start_date" value="{{ current_user.career_start_date.strftime('%Y-%m-%d') if current_user.career_start_date else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">最高级职称</label>
+                                            <select class="form-select" name="highest_title">
+                                                <option value="">请选择</option>
+                                                <option value="教授" {% if current_user.highest_title == '教授' %}selected{% endif %}>教授</option>
+                                                <option value="副教授" {% if current_user.highest_title == '副教授' %}selected{% endif %}>副教授</option>
+                                                <option value="讲师" {% if current_user.highest_title == '讲师' %}selected{% endif %}>讲师</option>
+                                                <option value="助教" {% if current_user.highest_title == '助教' %}selected{% endif %}>助教</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">获得最高级职称时间</label>
+                                            <input type="date" class="form-control" name="highest_title_date" value="{{ current_user.highest_title_date.strftime('%Y-%m-%d') if current_user.highest_title_date else '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">职务</label>
+                                            <select class="form-select" name="position">
+                                                <option value="">请选择</option>
+                                                <option value="院长" {% if current_user.position == '院长' %}selected{% endif %}>院长</option>
+                                                <option value="副院长" {% if current_user.position == '副院长' %}selected{% endif %}>副院长</option>
+                                                <option value="党总支书记" {% if current_user.position == '党总支书记' %}selected{% endif %}>党总支书记</option>
+                                                <option value="党总支副书记" {% if current_user.position == '党总支副书记' %}selected{% endif %}>党总支副书记</option>
+                                                <option value="教务办主任" {% if current_user.position == '教务办主任' %}selected{% endif %}>教务办主任</option>
+                                                <option value="产业办主任" {% if current_user.position == '产业办主任' %}selected{% endif %}>产业办主任</option>
+                                                <option value="教研室主任" {% if current_user.position == '教研室主任' %}selected{% endif %}>教研室主任</option>
+                                                <option value="教学秘书" {% if current_user.position == '教学秘书' %}selected{% endif %}>教学秘书</option>
+                                                <option value="专业负责人" {% if current_user.position == '专业负责人' %}selected{% endif %}>专业负责人</option>
+                                                <option value="教师" {% if current_user.position == '教师' %}selected{% endif %}>教师</option>
+                                                <option value="辅导员" {% if current_user.position == '辅导员' %}selected{% endif %}>辅导员</option>
+                                                <option value="其他" {% if current_user.position == '其他' %}selected{% endif %}>其他</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">学科</label>
+                                            <select class="form-select" name="subject">
+                                                <option value="">请选择</option>
+                                                <option value="数学" {% if current_user.subject == '数学' %}selected{% endif %}>数学</option>
+                                                <option value="计算机科学与技术" {% if current_user.subject == '计算机科学与技术' %}selected{% endif %}>计算机科学与技术</option>
+                                                <option value="其他" {% if current_user.subject == '其他' %}selected{% endif %}>其他</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">所属教学团队</label>
+                                            <select class="form-select" name="teaching_team">
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">所属科研团队</label>
+                                            <select class="form-select" name="research_team">
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">所属课题组</label>
+                                            <select class="form-select" name="research_group">
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-6" id="party_branch_container" {% if not current_user.political_status or current_user.political_status not in ['中共党员', '中共预备党员'] %}style="display: none;"{% endif %}>
-                                    <label class="form-label">所属党支部</label>
-                                    <select class="form-select" name="party_branch" id="party_branch" {% if not current_user.political_status or current_user.political_status not in ['中共党员', '中共预备党员'] %}disabled{% endif %}>
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.party_branch == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6" id="party_join_date_container" {% if current_user.political_status in ['群众', '无党派人士'] %}style="display: none;"{% endif %}>
-                                    <label class="form-label">入党时间</label>
-                                    <input type="date" class="form-control" name="party_join_date" id="party_join_date" value="{{ current_user.party_join_date.strftime('%Y-%m-%d') if current_user.party_join_date else '' }}" {% if not current_user.political_status or current_user.political_status not in ['中共党员', '中共预备党员'] %}disabled{% endif %}>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">籍贯</label>
-                                    <input type="text" class="form-control" name="hometown" placeholder="待添加" value="{{ current_user.hometown if current_user.hometown and current_user.hometown != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">联系电话</label>
-                                    <input type="tel" class="form-control" name="phone" placeholder="待添加" value="{{ current_user.phone if current_user.phone and current_user.phone != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">电子邮箱</label>
-                                    <input type="email" class="form-control" name="email" placeholder="待添加" value="{{ current_user.email if current_user.email and current_user.email != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label">家庭住址</label>
-                                    <input type="text" class="form-control" name="address" placeholder="待添加" value="{{ current_user.address if current_user.address and current_user.address != 'None' else '' }}">
+
+                                <!-- 保存按钮 -->
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-save me-1"></i>保存修改
+                                    </button>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 教育背景 -->
-                        <div class="mb-4">
-                            <h5>教育背景</h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">学历</label>
-                                    <select class="form-select" name="education_level">
-                                        <option value="">请选择</option>
-                                        <option value="博士研究生" {% if current_user.education_level == '博士研究生' %}selected{% endif %}>博士研究生</option>
-                                        <option value="硕士研究生" {% if current_user.education_level == '硕士研究生' %}selected{% endif %}>硕士研究生</option>
-                                        <option value="本科" {% if current_user.education_level == '本科' %}selected{% endif %}>本科</option>
-                                        <option value="专科" {% if current_user.education_level == '专科' %}selected{% endif %}>专科</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">学位</label>
-                                    <select class="form-select" name="degree">
-                                        <option value="">请选择</option>
-                                        <option value="博士" {% if current_user.degree == '博士' %}selected{% endif %}>博士</option>
-                                        <option value="硕士" {% if current_user.degree == '硕士' %}selected{% endif %}>硕士</option>
-                                        <option value="学士" {% if current_user.degree == '学士' %}selected{% endif %}>学士</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">获得学历时间</label>
-                                    <input type="date" class="form-control" name="education_date" value="{{ current_user.education_date.strftime('%Y-%m-%d') if current_user.education_date else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">获得学位时间</label>
-                                    <input type="date" class="form-control" name="degree_date" value="{{ current_user.degree_date.strftime('%Y-%m-%d') if current_user.degree_date else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">本科毕业学校</label>
-                                    <input type="text" class="form-control" name="bachelor_school" placeholder="待添加" value="{{ current_user.bachelor_school if current_user.bachelor_school and current_user.bachelor_school != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">硕士毕业学校</label>
-                                    <input type="text" class="form-control" name="master_school" placeholder="待添加" value="{{ current_user.master_school if current_user.master_school and current_user.master_school != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">博士毕业学校</label>
-                                    <input type="text" class="form-control" name="phd_school" placeholder="待添加" value="{{ current_user.phd_school if current_user.phd_school and current_user.phd_school != 'None' else '' }}">
+                            <!-- 右侧头像区域 -->
+                            <div class="col-md-3 ps-4">
+                                <div class="position-sticky" style="top: 2rem;">
+                                    <div class="text-center">
+                                        <div class="avatar-container mb-3">
+                                            <div class="avatar-preview rounded-circle mx-auto" style="width: 180px; height: 180px; overflow: hidden; border: 2px solid #eee;">
+                                                {% if current_user.photo_path %}
+                                                    <img src="{{ url_for('get_photo', filename=current_user.photo_path) }}" class="img-fluid" alt="用户头像" id="avatarPreview">
+                                                {% else %}
+                                                    {% if current_user.gender == '女' %}
+                                                        <img src="{{ url_for('static', filename='img/girl.png') }}" class="img-fluid" alt="默认女性头像" id="avatarPreview">
+                                                    {% else %}
+                                                        <img src="{{ url_for('static', filename='img/boy.png') }}" class="img-fluid" alt="默认男性头像" id="avatarPreview">
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <input type="file" name="photo" id="photoInput" accept="image/*" style="display: none;" onchange="previewImage(this);">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('photoInput').click();">
+                                            <i class="fas fa-camera me-1"></i>更换头像
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- 工作信息 -->
-                        <div class="mb-4">
-                            <h5>工作信息</h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">专业</label>
-                                    <input type="text" class="form-control" name="major" placeholder="待添加" value="{{ current_user.major if current_user.major and current_user.major != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属教研室</label>
-                                    <input type="text" class="form-control" name="teaching_group" placeholder="待添加" value="{{ current_user.teaching_group if current_user.teaching_group and current_user.teaching_group != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">是否双师</label>
-                                    <select class="form-select" name="is_dual_teacher">
-                                        <option value="">请选择</option>
-                                        <option value="是" {% if current_user.is_dual_teacher == '是' %}selected{% endif %}>是</option>
-                                        <option value="否" {% if current_user.is_dual_teacher == '否' %}selected{% endif %}>否</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">获得奖励称号</label>
-                                    <input type="text" class="form-control" name="award_title" placeholder="待添加" value="{{ current_user.award_title if current_user.award_title and current_user.award_title != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">人才称号</label>
-                                    <input type="text" class="form-control" name="talent_title" placeholder="待添加" value="{{ current_user.talent_title if current_user.talent_title and current_user.talent_title != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">研究方向</label>
-                                    <input type="text" class="form-control" name="research_direction" placeholder="待添加" value="{{ current_user.research_direction if current_user.research_direction and current_user.research_direction != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">入校时间</label>
-                                    <input type="date" class="form-control" name="work_start_date" value="{{ current_user.work_start_date.strftime('%Y-%m-%d') if current_user.work_start_date else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">参加工作时间</label>
-                                    <input type="date" class="form-control" name="career_start_date" value="{{ current_user.career_start_date.strftime('%Y-%m-%d') if current_user.career_start_date else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">最高级职称</label>
-                                    <input type="text" class="form-control" name="highest_title" placeholder="待添加" value="{{ current_user.highest_title if current_user.highest_title and current_user.highest_title != 'None' else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">获得最高级职称时间</label>
-                                    <input type="date" class="form-control" name="highest_title_date" value="{{ current_user.highest_title_date.strftime('%Y-%m-%d') if current_user.highest_title_date else '' }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">职务</label>
-                                    <select class="form-select" name="position">
-                                        <option value="">请选择</option>
-                                        <option value="院长" {% if current_user.position == '院长' %}selected{% endif %}>院长</option>
-                                        <option value="副院长" {% if current_user.position == '副院长' %}selected{% endif %}>副院长</option>
-                                        <option value="党总支书记" {% if current_user.position == '党总支书记' %}selected{% endif %}>党总支书记</option>
-                                        <option value="党总支副书记" {% if current_user.position == '党总支副书记' %}selected{% endif %}>党总支副书记</option>
-                                        <option value="教务办主任" {% if current_user.position == '教务办主任' %}selected{% endif %}>教务办主任</option>
-                                        <option value="产业办主任" {% if current_user.position == '产业办主任' %}selected{% endif %}>产业办主任</option>
-                                        <option value="教研室主任" {% if current_user.position == '教研室主任' %}selected{% endif %}>教研室主任</option>
-                                        <option value="教学秘书" {% if current_user.position == '教学秘书' %}selected{% endif %}>教学秘书</option>
-                                        <option value="专业负责人" {% if current_user.position == '专业负责人' %}selected{% endif %}>专业负责人</option>
-                                        <option value="教师" {% if current_user.position == '教师' %}selected{% endif %}>教师</option>
-                                        <option value="辅导员" {% if current_user.position == '辅导员' %}selected{% endif %}>辅导员</option>
-                                        <option value="其他" {% if current_user.position == '其他' %}selected{% endif %}>其他</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">学科</label>
-                                    <select class="form-select" name="subject">
-                                        <option value="">请选择</option>
-                                        <option value="数学" {% if current_user.subject == '数学' %}selected{% endif %}>数学</option>
-                                        <option value="计算机科学与技术" {% if current_user.subject == '计算机科学与技术' %}selected{% endif %}>计算机科学与技术</option>
-                                        <option value="其他" {% if current_user.subject == '其他' %}selected{% endif %}>其他</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属教学团队</label>
-                                    <select class="form-select" name="teaching_team">
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.teaching_team == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属科研团队</label>
-                                    <select class="form-select" name="research_team">
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.research_team == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">所属课题组</label>
-                                    <select class="form-select" name="project_group">
-                                        <option value="">请选择</option>
-                                        <option value="待定" {% if current_user.project_group == '待定' %}selected{% endif %}>待定</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary">保存修改</button>
                         </div>
                     </form>
                 </div>
@@ -263,150 +323,163 @@
 </div>
 
 <style>
-.avatar-upload {
+.form-label {
+    color: #555;
+    margin-bottom: 0.3rem;
+}
+.card {
+    border: none;
+}
+
+.alert {
+    z-index: 1050;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert.fade {
+    transition: opacity 0.3s linear;
+}
+
+.avatar-preview {
+    transition: all 0.3s ease;
     cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.avatar-wrapper {
-    position: relative;
-    display: inline-block;
+.avatar-preview:hover {
+    border-color: #007bff !important;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-.avatar-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
+.avatar-preview img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+}
+
+.border-end {
+    border-right: 1px solid #eee !important;
+}
+
+.position-sticky {
+    position: sticky;
+    top: 2rem;
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
     color: white;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
 }
 
-.avatar-overlay i {
-    font-size: 24px;
-    margin-bottom: 8px;
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    padding: 0.5rem 2rem;
+    font-size: 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
 }
 
-.avatar-wrapper:hover .avatar-overlay {
-    display: flex;
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:active {
+    background-color: #bd2130;
+    border-color: #b21f2d;
+}
+
+/* 模块样式 */
+.module-basic {
+    background-color: #fff5f5;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #dc3545;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.module-education {
+    background-color: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #ffc107;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.module-work {
+    background-color: #d4edda;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #28a745;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 模块标题样式 */
+.module-basic h5 {
+    color: #dc3545 !important;
+    font-weight: 600;
+}
+
+.module-education h5 {
+    color: #856404 !important;
+    font-weight: 600;
+}
+
+.module-work h5 {
+    color: #155724 !important;
+    font-weight: 600;
+}
+
+/* 模块内表单标签样式 */
+.module-basic .form-label {
+    color: #dc3545;
+}
+
+.module-education .form-label {
+    color: #856404;
+}
+
+.module-work .form-label {
+    color: #155724;
+}
+
+/* 模块内输入框样式 */
+.module-basic .form-control,
+.module-basic .form-select {
+    border-color: #f8d7da;
+    background-color: #fff;
+}
+
+.module-education .form-control,
+.module-education .form-select {
+    border-color: #ffeeba;
+    background-color: #fff;
+}
+
+.module-work .form-control,
+.module-work .form-select {
+    border-color: #c3e6cb;
+    background-color: #fff;
+}
+
+/* 模块间距调整 */
+.mb-5 {
+    margin-bottom: 2rem !important;
 }
 </style>
 
 <script>
-function togglePartyJoinDate() {
-    var politicalStatus = document.querySelector('select[name="political_status"]').value;
-    var partyJoinDateDiv = document.getElementById('partyJoinDateDiv');
-    if (politicalStatus === '中共党员') {
-        partyJoinDateDiv.style.display = 'block';
-    } else {
-        partyJoinDateDiv.style.display = 'none';
-    }
-}
-
-document.getElementById('photo').addEventListener('change', function(e) {
-    if (this.files && this.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.querySelector('.avatar-wrapper img').src = e.target.result;
-        };
-        reader.readAsDataURL(this.files[0]);
-    }
-});
-
-function submitForm(form) {
-    fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('网络响应出错');
-        }
-        return response.text();
-    })
-    .then(html => {
-        // 显示成功消息
-        const successMessage = document.createElement('div');
-        successMessage.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
-        successMessage.style.zIndex = '1050';
-        successMessage.innerHTML = `
-            个人信息更新成功
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        document.body.appendChild(successMessage);
-
-        // 解析返回的HTML并更新页面内容
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        
-        // 更新表单字段的值
-        const newForm = tempDiv.querySelector('form');
-        const currentForm = document.querySelector('form');
-        
-        // 更新所有input, select和textarea字段
-        ['input', 'select', 'textarea'].forEach(fieldType => {
-            currentForm.querySelectorAll(fieldType).forEach(field => {
-                const newField = newForm.querySelector(`${fieldType}[name="${field.name}"]`);
-                if (newField) {
-                    if (fieldType === 'select') {
-                        field.value = newField.value;
-                    } else if (field.type === 'file') {
-                        // 跳过文件输入框
-                        return;
-                    } else {
-                        field.value = newField.value;
-                    }
-                }
-            });
-        });
-
-        // 更新头像（如果有变化）
-        const newAvatar = newForm.querySelector('.avatar-wrapper img');
-        const currentAvatar = document.querySelector('.avatar-wrapper img');
-        if (newAvatar && currentAvatar) {
-            currentAvatar.src = newAvatar.src;
-        }
-
-        // 重新计算年龄（如果有出生日期字段）
-        const birthDateInput = currentForm.querySelector('input[name="birth_date"]');
-        if (birthDateInput) {
-            calculateAge(birthDateInput);
-        }
-
-        // 3秒后自动关闭消息
-        setTimeout(() => {
-            if (successMessage.parentNode) {
-                successMessage.remove();
-            }
-        }, 3000);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // 显示错误消息
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
-        errorMessage.style.zIndex = '1050';
-        errorMessage.innerHTML = `
-            更新失败，请重试
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        document.body.appendChild(errorMessage);
-        
-        // 3秒后自动关闭消息
-        setTimeout(() => {
-            if (errorMessage.parentNode) {
-                errorMessage.remove();
-            }
-        }, 3000);
-    });
-    return false;
-}
-
 function calculateAge(input) {
     const birthDate = new Date(input.value);
     const today = new Date();
@@ -425,48 +498,129 @@ function calculateAge(input) {
     }
 }
 
-// 页面加载时计算年龄
-document.addEventListener('DOMContentLoaded', function() {
-    const birthDateInput = document.querySelector('input[name="birth_date"]');
-    if (birthDateInput) {
-        calculateAge(birthDateInput);
-    }
-});
+function submitForm(form) {
+    const formData = new FormData(form);
+    
+    fetch('/profile', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('网络响应出错');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // 显示成功消息
+            const successMessage = document.createElement('div');
+            successMessage.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            successMessage.style.zIndex = '1050';
+            successMessage.innerHTML = `
+                ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(successMessage);
 
-function handlePoliticalStatusChange(select) {
-    const partyBranchContainer = document.getElementById('party_branch_container');
-    const partyBranchSelect = document.getElementById('party_branch');
-    const partyJoinDateContainer = document.getElementById('party_join_date_container');
-    const partyJoinDateInput = document.getElementById('party_join_date');
+            // 更新表单字段的值
+            if (data.data) {
+                Object.keys(data.data).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.type === 'date' && data.data[key]) {
+                            input.value = data.data[key];
+                        } else if (input.type === 'select-one') {
+                            const option = input.querySelector(`option[value="${data.data[key]}"]`);
+                            if (option) {
+                                option.selected = true;
+                            }
+                        } else {
+                            input.value = data.data[key] || '';
+                        }
+                    }
+                });
+            }
+
+            // 3秒后自动关闭消息
+            setTimeout(() => {
+                if (successMessage.parentNode) {
+                    successMessage.remove();
+                }
+            }, 3000);
+        } else {
+            throw new Error(data.message || '更新失败');
+        }
+    })
+    .catch(error => {
+        // 显示错误消息
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+        errorMessage.style.zIndex = '1050';
+        errorMessage.innerHTML = `
+            ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(errorMessage);
+
+        // 3秒后自动关闭消息
+        setTimeout(() => {
+            if (errorMessage.parentNode) {
+                errorMessage.remove();
+            }
+        }, 3000);
+    });
     
-    const isPartyMember = select.value === '中共党员' || select.value === '中共预备党员';
-    
-    // 处理党支部显示/隐藏
-    if (isPartyMember) {
-        partyBranchContainer.style.display = '';
-        partyBranchSelect.disabled = false;
-    } else {
-        partyBranchContainer.style.display = 'none';
-        partyBranchSelect.disabled = true;
-        partyBranchSelect.value = '';
-    }
-    
-    // 处理入党时间显示/隐藏
-    if (select.value === '群众' || select.value === '无党派人士') {
-        partyJoinDateContainer.style.display = 'none';
-        partyJoinDateInput.disabled = true;
-        partyJoinDateInput.value = '';
-    } else {
-        partyJoinDateContainer.style.display = '';
-        partyJoinDateInput.disabled = false;
+    return false; // 阻止表单默认提交
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatarPreview').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
     }
 }
 
-// 页面加载时初始化政治面貌和入党时间的联动
+function togglePartyFields() {
+    var politicalStatus = document.getElementById('political_status').value;
+    var partyJoinDateGroup = document.getElementById('party_join_date_group');
+    var partyBranchGroup = document.getElementById('party_branch_group');
+    
+    if (politicalStatus === '中共党员' || politicalStatus === '中共预备党员') {
+        partyJoinDateGroup.style.display = 'block';
+        partyBranchGroup.style.display = 'block';
+    } else {
+        partyJoinDateGroup.style.display = 'none';
+        partyBranchGroup.style.display = 'none';
+        // 如果不是党员，清空入党时间
+        document.querySelector('input[name="party_join_date"]').value = '';
+        document.querySelector('select[name="party_branch"]').value = '';
+    }
+}
+
+// 页面加载完成后立即执行
 document.addEventListener('DOMContentLoaded', function() {
-    const politicalStatusSelect = document.querySelector('select[name="political_status"]');
-    if (politicalStatusSelect) {
-        handlePoliticalStatusChange(politicalStatusSelect);
+    // 确保页面加载时就正确显示/隐藏入党时间
+    togglePartyFields();
+});
+
+// 添加提示消息自动消失的脚本
+document.addEventListener('DOMContentLoaded', function() {
+    const alert = document.getElementById('successAlert');
+    if (alert) {
+        setTimeout(function() {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 3000);
     }
 });
 </script>

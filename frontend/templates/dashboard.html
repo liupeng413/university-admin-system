@@ -1,65 +1,59 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <div class="row g-4">
-        <!-- 个人信息卡片 -->
+<div class="container mt-4">
+    <div class="row">
         <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="bi bi-person-circle me-2"></i>个人信息
-                    </h5>
-                </div>
+            <div class="card">
                 <div class="card-body">
-                    <p><strong>姓名：</strong>{{ current_user.name }}</p>
-                    <p><strong>角色：</strong>{{ current_user.role }}</p>
-                    <p><strong>专业：</strong>{{ current_user.major }}</p>
-                    <p><strong>职称：</strong>{{ current_user.title }}</p>
-                    <a href="{{ url_for('profile') }}" class="btn btn-outline-danger">查看/编辑个人信息</a>
+                    <h5 class="card-title">个人信息</h5>
+                    <div class="text-center mb-3">
+                        <img src="{{ user_info.photo_path|default('/static/images/default-avatar.png', true) }}" 
+                             class="rounded-circle" alt="头像" 
+                             style="width: 100px; height: 100px; object-fit: cover;">
+                    </div>
+                    <div class="user-info">
+                        <p><strong>姓名：</strong>{{ user_info.name or '未设置' }}</p>
+                        <p><strong>工号：</strong>{{ user_info.employee_number or '未设置' }}</p>
+                        <p><strong>职称：</strong>{{ user_info.highest_title or '未设置' }}</p>
+                        <p><strong>部门：</strong>{{ user_info.department or '未设置' }}</p>
+                        <a href="{{ url_for('profile') }}" class="btn btn-primary btn-sm">编辑资料</a>
+                    </div>
                 </div>
             </div>
         </div>
-
-        {% if current_user.role == 'admin' %}
-        <!-- 管理功能卡片 -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="bi bi-gear me-2"></i>管理功能
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">作为系统管理员，您可以管理教师信息和查看所有文件。</p>
-                    <a href="{{ url_for('list_teachers') }}" class="btn btn-outline-danger mb-2 w-100">教师管理</a>
-                    <a href="{{ url_for('list_files') }}" class="btn btn-outline-danger w-100">文件管理</a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- 文件管理卡片 -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="bi bi-file-earmark-text me-2"></i>文件管理
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="file" class="form-label">上传新文件</label>
-                            <input type="file" class="form-control" id="file" name="file">
-                        </div>
-                        <button type="submit" class="btn btn-outline-danger">上传文件</button>
-                    </form>
-                    <hr>
-                    <a href="{{ url_for('list_files') }}" class="btn btn-outline-secondary w-100">查看我的文件</a>
-                </div>
-            </div>
+        
+        <div class="col-md-8">
+            <!-- 其他仪表板内容 -->
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 页面加载时获取最新的用户信息
+    fetch('/api/user/info')
+        .then(response => response.json())
+        .then(data => {
+            if (data.code === 200) {
+                updateUserInfo(data.data);
+            }
+        })
+        .catch(error => console.error('获取用户信息失败:', error));
+});
+
+function updateUserInfo(userInfo) {
+    // 更新页面上的用户信息
+    const userInfoDiv = document.querySelector('.user-info');
+    if (userInfoDiv) {
+        userInfoDiv.innerHTML = `
+            <p><strong>姓名：</strong>${userInfo.name || '未设置'}</p>
+            <p><strong>工号：</strong>${userInfo.employee_number || '未设置'}</p>
+            <p><strong>职称：</strong>${userInfo.highest_title || '未设置'}</p>
+            <p><strong>部门：</strong>${userInfo.department || '未设置'}</p>
+            <a href="/profile" class="btn btn-primary btn-sm">编辑资料</a>
+        `;
+    }
+}
+</script>
 {% endblock %} 

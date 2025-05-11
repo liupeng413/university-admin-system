@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0 text-primary-color">教师指导学生实习情况</h2>
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addInternshipModal">
+                    <i class="bi bi-plus-circle"></i> 添加实习记录
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>序号</th>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>身份证号</th>
+                            <th>专业</th>
+                            <th>班级</th>
+                            <th>实习单位</th>
+                            <th>实习岗位</th>
+                            <th>实习类型</th>
+                            <th>开始日期</th>
+                            <th>结束日期</th>
+                            <th>实习成绩</th>
+                            <th>指导教师</th>
+                            <th>职称</th>
+                            <th>联系方式</th>
+                            <th class="text-end">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for internship in internships %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ internship.student_id }}</td>
+                            <td>{{ internship.student_name }}</td>
+                            <td>{{ internship.gender }}</td>
+                            <td>{{ internship.id_number }}</td>
+                            <td>{{ internship.major }}</td>
+                            <td>{{ internship.class_name }}</td>
+                            <td>{{ internship.internship_company }}</td>
+                            <td>{{ internship.internship_position }}</td>
+                            <td>{{ internship.internship_type }}</td>
+                            <td>{{ internship.start_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ internship.end_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ internship.internship_score }}</td>
+                            <td>{{ internship.supervisor_name }}</td>
+                            <td>{{ internship.supervisor_title }}</td>
+                            <td>{{ internship.supervisor_phone }}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editInternshipModal{{ internship.id }}">
+                                    <i class="bi bi-pencil"></i> 编辑
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteInternship({{ internship.id }})">
+                                    <i class="bi bi-trash"></i> 删除
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加实习记录模态框 -->
+<div class="modal fade" id="addInternshipModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加实习记录</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addInternshipForm" method="post" action="{{ url_for('add_internship') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="row">
+                        <!-- 学生基本信息 -->
+                        <div class="col-md-12 mb-3">
+                            <h6 class="fw-bold">学生基本信息</h6>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">学号</label>
+                            <input type="text" class="form-control" name="student_id" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">姓名</label>
+                            <input type="text" class="form-control" name="student_name" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">性别</label>
+                            <select class="form-select" name="gender" required>
+                                <option value="">请选择</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">身份证号</label>
+                            <input type="text" class="form-control" name="id_number" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">专业</label>
+                            <input type="text" class="form-control" name="major" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">班级</label>
+                            <input type="text" class="form-control" name="class_name" required>
+                        </div>
+
+                        <!-- 实习信息 -->
+                        <div class="col-md-12 mb-3">
+                            <h6 class="fw-bold">实习信息</h6>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">实习单位</label>
+                            <input type="text" class="form-control" name="internship_company" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">实习岗位</label>
+                            <input type="text" class="form-control" name="internship_position" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">实习类型</label>
+                            <select class="form-select" name="internship_type" required>
+                                <option value="">请选择</option>
+                                <option value="认知实习">认知实习</option>
+                                <option value="专业实习">专业实习</option>
+                                <option value="毕业实习">毕业实习</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">开始日期</label>
+                            <input type="date" class="form-control" name="start_date" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">结束日期</label>
+                            <input type="date" class="form-control" name="end_date" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">实习成绩</label>
+                            <input type="number" class="form-control" name="internship_score" step="0.1" min="0" max="100" required>
+                        </div>
+
+                        <!-- 指导教师信息 -->
+                        <div class="col-md-12 mb-3">
+                            <h6 class="fw-bold">指导教师信息</h6>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">指导教师</label>
+                            <input type="text" class="form-control" name="supervisor_name" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">职称</label>
+                            <input type="text" class="form-control" name="supervisor_title" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">联系方式</label>
+                            <input type="text" class="form-control" name="supervisor_phone" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" form="addInternshipForm" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteInternship(id) {
+    if (confirm('确定要删除这条实习记录吗？')) {
+        fetch(`/internship/${id}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败，请稍后重试');
+        });
+    }
+}
+</script>
+{% endblock %} 

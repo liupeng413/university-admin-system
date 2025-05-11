@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">教学立项与教研成果</h5>
+            <!-- 子标签页导航 -->
+            <ul class="nav nav-pills mb-3" id="researchTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="teaching-projects-tab" data-bs-toggle="pill" 
+                            data-bs-target="#teaching-projects" type="button" role="tab">
+                        教务处所设立项
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="evaluation-projects-tab" data-bs-toggle="pill" 
+                            data-bs-target="#evaluation-projects" type="button" role="tab">
+                        评估中心所设立项
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="research-results-tab" data-bs-toggle="pill" 
+                            data-bs-target="#research-results" type="button" role="tab">
+                        教研成果
+                    </button>
+                </li>
+            </ul>
+
+            <!-- 子标签页内容 -->
+            <div class="tab-content" id="researchTabsContent">
+                <!-- 教务处所设立项标签页 -->
+                <div class="tab-pane fade show active" id="teaching-projects" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>教务处所设立项</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTeachingProjectModal">
+                            <i class="bi bi-plus-circle"></i> 添加项目
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="teachingProjectsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>项目类型</th>
+                                    <th>项目名称</th>
+                                    <th>项目级别</th>
+                                    <th>立项时间</th>
+                                    <th>结项时间</th>
+                                    <th>项目状态</th>
+                                    <th>附件</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 评估中心所设立项标签页 -->
+                <div class="tab-pane fade" id="evaluation-projects" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>评估中心所设立项</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addEvaluationProjectModal">
+                            <i class="bi bi-plus-circle"></i> 添加项目
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="evaluationProjectsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>项目类型</th>
+                                    <th>项目名称</th>
+                                    <th>项目级别</th>
+                                    <th>是否结题</th>
+                                    <th>结题时间</th>
+                                    <th>附件</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 教研成果标签页 -->
+                <div class="tab-pane fade" id="research-results" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5>教研成果</h5>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addResearchResultModal">
+                            <i class="bi bi-plus-circle"></i> 添加论文
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="researchPapersTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>论文标题</th>
+                                    <th>发表期刊</th>
+                                    <th>发表时间</th>
+                                    <th>作者</th>
+                                    <th>附件</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 教务处所设立项添加模态框 -->
+<div class="modal fade" id="addTeachingProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加教务处项目</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTeachingProjectForm">
+                    <div class="mb-3">
+                        <label class="form-label">项目类型</label>
+                        <select class="form-select" name="project_type" required>
+                            <option value="">请选择项目类型</option>
+                            <option value="课程建设">课程建设</option>
+                            <option value="教学竞赛">教学竞赛</option>
+                            <option value="教学成果奖">教学成果奖</option>
+                            <option value="教学团队">教学团队</option>
+                            <option value="教材建设">教材建设</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目名称</label>
+                        <input type="text" class="form-control" name="project_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目级别</label>
+                        <input type="text" class="form-control" name="project_level">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">立项时间</label>
+                        <input type="date" class="form-control" name="approval_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">结项时间</label>
+                        <input type="date" class="form-control" name="completion_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目状态</label>
+                        <select class="form-select" name="status" required>
+                            <option value="在研">在研</option>
+                            <option value="已结题">已结题</option>
+                            <option value="已终止">已终止</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">附件（立项书/申报书/审批文件）</label>
+                        <input type="file" class="form-control" name="attachment">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitTeachingProject()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 评估中心所设立项添加模态框 -->
+<div class="modal fade" id="addEvaluationProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加评估中心项目</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addEvaluationProjectForm">
+                    <div class="mb-3">
+                        <label class="form-label">项目类型</label>
+                        <select class="form-select" name="project_type" required>
+                            <option value="">请选择项目类型</option>
+                            <option value="校级教改">校级教改立项</option>
+                            <option value="省级教改">省级教改立项</option>
+                            <option value="省级教学规划课题">省级教学规划课题</option>
+                            <option value="其它">其它</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目名称</label>
+                        <input type="text" class="form-control" name="project_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">项目级别</label>
+                        <input type="text" class="form-control" name="project_level">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">是否结题</label>
+                        <select class="form-select" name="is_completed" required>
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">结题时间</label>
+                        <input type="date" class="form-control" name="completion_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">附件</label>
+                        <input type="file" class="form-control" name="attachment">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitEvaluationProject()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 教研成果添加模态框 -->
+<div class="modal fade" id="addResearchResultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加论文</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addResearchResultForm">
+                    <div class="mb-3">
+                        <label class="form-label">论文标题</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">发表期刊</label>
+                        <input type="text" class="form-control" name="journal">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">发表时间</label>
+                        <input type="date" class="form-control" name="publish_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">作者</label>
+                        <input type="text" class="form-control" name="authors">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">论文附件</label>
+                        <input type="file" class="form-control" name="attachment">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitResearchPaper()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面加载时获取数据
+document.addEventListener('DOMContentLoaded', function() {
+    loadTeachingProjects();
+    loadEvaluationProjects();
+    loadResearchPapers();
+});
+
+// 提交教务处项目
+function submitTeachingProject() {
+    const form = document.getElementById('addTeachingProjectForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/teaching_projects', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#addTeachingProjectModal').modal('hide');
+            form.reset();
+            loadTeachingProjects();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 提交评估中心项目
+function submitEvaluationProject() {
+    const form = document.getElementById('addEvaluationProjectForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/evaluation_projects', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#addEvaluationProjectModal').modal('hide');
+            form.reset();
+            loadEvaluationProjects();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 提交教研论文
+function submitResearchPaper() {
+    const form = document.getElementById('addResearchResultForm');
+    const formData = new FormData(form);
+    
+    fetch('/api/research_papers', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#addResearchResultModal').modal('hide');
+            form.reset();
+            loadResearchPapers();
+        } else {
+            alert('添加失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('添加失败：' + error);
+    });
+}
+
+// 加载教务处项目数据
+function loadTeachingProjects() {
+    fetch('/api/teaching_projects')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#teachingProjectsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(project => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${project.project_type}</td>
+                        <td>${project.project_name}</td>
+                        <td>${project.project_level || ''}</td>
+                        <td>${project.approval_date || ''}</td>
+                        <td>${project.completion_date || ''}</td>
+                        <td>${project.status}</td>
+                        <td>${project.attachment_path ? 
+                            `<a href="/download/${project.attachment_path}" target="_blank">查看附件</a>` : 
+                            '无'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTeachingProject(${project.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            alert('加载失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('加载失败：' + error);
+    });
+}
+
+// 加载评估中心项目数据
+function loadEvaluationProjects() {
+    fetch('/api/evaluation_projects')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#evaluationProjectsTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(project => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${project.project_type}</td>
+                        <td>${project.project_name}</td>
+                        <td>${project.project_level || ''}</td>
+                        <td>${project.is_completed ? '是' : '否'}</td>
+                        <td>${project.completion_date || ''}</td>
+                        <td>${project.attachment_path ? 
+                            `<a href="/download/${project.attachment_path}" target="_blank">查看附件</a>` : 
+                            '无'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteEvaluationProject(${project.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            alert('加载失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('加载失败：' + error);
+    });
+}
+
+// 加载教研论文数据
+function loadResearchPapers() {
+    fetch('/api/research_papers')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const tbody = document.querySelector('#researchPapersTable tbody');
+            tbody.innerHTML = '';
+            data.data.forEach(paper => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${paper.title}</td>
+                        <td>${paper.journal || ''}</td>
+                        <td>${paper.publish_date || ''}</td>
+                        <td>${paper.authors || ''}</td>
+                        <td>${paper.attachment_path ? 
+                            `<a href="/download/${paper.attachment_path}" target="_blank">查看附件</a>` : 
+                            '无'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteResearchPaper(${paper.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } else {
+            alert('加载失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('加载失败：' + error);
+    });
+}
+
+// 删除教务处项目
+function deleteTeachingProject(id) {
+    if (confirm('确定要删除这个项目吗？')) {
+        fetch(`/api/teaching_projects/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadTeachingProjects();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+
+// 删除评估中心项目
+function deleteEvaluationProject(id) {
+    if (confirm('确定要删除这个项目吗？')) {
+        fetch(`/api/evaluation_projects/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadEvaluationProjects();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+
+// 删除教研论文
+function deleteResearchPaper(id) {
+    if (confirm('确定要删除这篇论文吗？')) {
+        fetch(`/api/research_papers/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadResearchPapers();
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('删除失败：' + error);
+        });
+    }
+}
+</script>
+{% endblock %} 
