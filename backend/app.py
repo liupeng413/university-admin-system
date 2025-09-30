@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, session, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -5,16 +9,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from functools import wraps
-import os
 import uuid
 from collections import defaultdict
 from flask_wtf.csrf import CSRFProtect
 from flask_migrate import Migrate
-from models import User, db, Internship, GraduationProject, TeacherCourse, TeachingProject, EvaluationProject, ResearchPaper, InnovationProject, Competition, CollegeEvent, FiveOneMentor, File, FiveOneProject, Teacher, Course, ScientificProject, ScientificAward, BookRecord, TeachingRecord, ResearchRecord, CompetitionRecord, TrainingRecord
+from backend.models import User, db, Internship, GraduationProject, TeacherCourse, TeachingProject, EvaluationProject, ResearchPaper, InnovationProject, Competition, CollegeEvent, FiveOneMentor, File, FiveOneProject, Teacher, Course, ScientificProject, ScientificAward, BookRecord, TeachingRecord, ResearchRecord, CompetitionRecord, TrainingRecord
 import subprocess
 import shutil
 import platform
 import time
+
 
 def get_file_extension(filename):
     """获取文件扩展名"""
