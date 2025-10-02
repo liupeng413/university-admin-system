@@ -54,7 +54,7 @@ app = Flask(__name__,
     static_folder='../frontend/static'
 )
 
-@app.route("/healthcheck", methods=["GET"])
+@app.route("/health", methods=["GET"])
 def healthcheck():
     return "ok deployed by Actions1234",200
 app.config['SECRET_KEY'] = 'your-fixed-secret-key-here'  # 使用固定的密钥
