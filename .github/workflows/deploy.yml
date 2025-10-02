@@ -21,9 +21,10 @@ jobs:
       - name: Rsync code to server
         run: |
           rsync -az --delete \
+            --exclude-from=".rsyncignore" \
             -e "ssh -o StrictHostKeyChecking=no" \
             ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}
-
+      
       - name: Remote deploy
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
