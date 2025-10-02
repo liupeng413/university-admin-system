@@ -55,7 +55,7 @@ app = Flask(__name__,
 )
 
 @app.route("/health", methods=["GET"])
-def healthcheck():
+def health():
     return "ok deployed by Actions1234",200
 
 @app.route("/healthcheck", methods=["GET"])
