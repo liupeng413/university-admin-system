@@ -1,0 +1,15 @@
+# Python / venv
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# GitHub/CI
+.git/
+.github/
+
+# 本地临时构建、上传目录（按需）
+uploads_backup/
+uploads/
+dist/
+build/
