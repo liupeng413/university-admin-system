@@ -56,7 +56,7 @@ app = Flask(__name__,
 
 @app.route("/healthcheck", methods=["GET"])
 def healthcheck():
-    return "ok deployed by Actions111",200
+    return "ok deployed by Actions123",200
 app.config['SECRET_KEY'] = 'your-fixed-secret-key-here'  # 使用固定的密钥
 app.config['WTF_CSRF_SECRET_KEY'] = 'your-fixed-csrf-secret-key-here'  # 使用固定的CSRF密钥
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 会话持续时间为24小时
