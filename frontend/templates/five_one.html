@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% if current_user.name == '张艳鹏' %}
+<div class="text-end mb-3">
+  <a href="{{ url_for('view_five_one', year=2025) }}" class="btn btn-outline-primary">
+    查看所有教师五个一工程
+  </a>
+</div>
+{% endif %}
+
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">五个一工程</h2>

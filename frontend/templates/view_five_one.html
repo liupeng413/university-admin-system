@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">五个一工程 - {{ record.year }}年</h2>
+    <h2 class="mb-4">五个一工程 - {{record.teacher.name}} - {{record.year}}年</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

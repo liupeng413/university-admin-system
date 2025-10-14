@@ -504,6 +504,19 @@ class BookRecord(db.Model):
     has_notes = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'project_id': self.project_id,
+            'book_title': self.book_title,
+            'book_number': self.book_number,
+            'publish_date': self.publish_date.strftime('%Y-%m-%d %H:%M:%S') if self.publish_date else None,
+            'publisher': self.publisher,
+            'author': self.author,
+            'has_notes': self.has_notes,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+        }
+
 class TeachingRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
@@ -513,6 +526,17 @@ class TeachingRecord(db.Model):
     achievement_ranking = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'project_id': self.project_id,
+            'achievement_name': self.achievement_name,
+            'achievement_type': self.achievement_type,
+            'achievement_date': self.achievement_date,
+            'achievement_ranking': self.achievement_ranking,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+        }
+
 class ResearchRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
@@ -521,6 +545,17 @@ class ResearchRecord(db.Model):
     research_date = db.Column(db.Date)
     research_ranking = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'project_id': self.project_id,
+            'achievement_name': self.achievement_name,
+            'research_type': self.research_type,
+            'research_date': self.research_date.strftime('%Y-%m-%d %H:%M:%S') if self.research_date else None,
+            'research_ranking': self.research_ranking,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+        }
 
 class CompetitionRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -533,6 +568,19 @@ class CompetitionRecord(db.Model):
     student_names = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'project_id': self.project_id,
+            'competition_name': self.competition_name,
+            'competition_organizer': self.competition_organizer,
+            'competition_type': self.competition_type,
+            'competition_date': self.competition_date.strftime('%Y-%m-%d %H:%M:%S') if self.competition_date else None,
+            'award_level': self.award_level,
+            'student_names': self.student_names,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+        }
+
 class TrainingRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('five_one_project.id'), nullable=False)
@@ -542,6 +590,18 @@ class TrainingRecord(db.Model):
     training_location = db.Column(db.String(100))
     training_description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'project_id': self.project_id,
+            'training_name': self.training_name,
+            'training_organizer': self.training_organizer,
+            'training_date': self.training_date.strftime('%Y-%m-%d %H:%M:%S') if self.training_date else None,
+            'training_location': self.training_location,
+            'training_description': self.training_description,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+        }
 
 class Teacher(db.Model):
     """教师信息模型"""

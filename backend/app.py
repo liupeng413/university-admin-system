@@ -18,6 +18,7 @@ import subprocess
 import shutil
 import platform
 import time
+from backend.config.config import ADMIN_TEACHERS
 
 
 def get_file_extension(filename):
@@ -1099,17 +1100,26 @@ def delete_five_one_record(record_type, record_id):
             'success': False,
             'message': f'删除失败：{str(e)}'
         })
-
+@app.route('/view_five_one')
 @app.route('/view_five_one/<int:year>')
 @login_required
 def view_five_one(year):
     try:
+        if not year:
+            year = datetime.now().year
+        teacher_id = request.args.get('teacher_id',type=int)
         year = int(year)
-        teacher_id = request.args.get('teacher_id', type=int)
         if can_view_all_five_one():
             if teacher_id:
+                #查看指定教师某年的五个一工程
                 record = FiveOneProject.query.filter_by(year=year, teacher_id=teacher_id).first()
+                if not record:
+                    teacher_name = User.query.get(teacher_id).name
+                    flash(f'{teacher_name}还未编辑{year}年信息','info')
+                    return redirect(url_for('view_five_one', year=year, teacher_id=teacher_id))
+                return render_template('view_five_one.html',record=record,year=year,teacher_id=teacher_id)
             else:
+                #查看所有教师五个一工程
                 records = FiveOneProject.query.filter_by(year=year).all()
                 teachers = {r.teacher_id: User.query.get(r.teacher_id).name for r in records}
                 # 组装每个教师的所有五个一工程子项为列表
@@ -1123,9 +1133,14 @@ def view_five_one(year):
                         'competition_records': [t.to_dict() for t in r.competition_records],
                         'training_records': [t.to_dict() for t in r.training_records],
                     })
-                return render_template('view_five_one_list.html', records=record_list, teachers=teachers, year=year)
-        else:
-            record = FiveOneProject.query.filter_by(year=year, teacher_id=current_user.id).first()
+                #提供年份下拉框可选
+                years = [y for y in range(2022,datetime.now().year + 1)]
+                return render_template('view_five_one_list.html',
+                                       records=record_list,
+                                       teachers=teachers,
+                                       year=year,
+                                       years=years,)
+        record = FiveOneProject.query.filter_by(year=year,teacher_id=current_user.id).first()
         if not record:
             teacher_name = User.query.get(teacher_id).name if teacher_id else current_user.name
             flash(f'{teacher_name}还未编辑{year}年信息', 'info')
@@ -1692,7 +1707,12 @@ add_to_dict_methods()
 def handle_teaching_projects():
     if request.method == 'GET':
         try:
-            projects = TeachingProject.query.filter_by(teacher_id=current_user.id).all()
+            if current_user.username in ADMIN_TEACHERS:
+                #管理员查看所有教师项目
+                projects = TeachingProject.query.all()
+            else:
+                #普通教师只能查看自己的
+                projects = TeachingProject.query.filter_by(teacher_id=current_user.id).all()
             return jsonify({
                 'success': True,
                 'message': '获取成功',
