@@ -1458,8 +1458,24 @@ def teacher_teaching():
 @login_required
 def teaching_research():
     """教学立项与教研成果页面"""
-    return render_template('teaching_research.html', 
-                         is_admin_teacher=current_user.username in ['zhangyanpeng', 'wangpeng'])
+    is_admin_teacher=current_user.username in ADMIN_TEACHERS
+    if is_admin_teacher:
+        #显示全部教师信息
+        teaching_projects = TeachingProject.query.all()
+        evaluation_projects =  EvaluationProject.query.all()
+        research_paper = ResearchPaper.query.all()
+    else:
+        #只显示自己信息
+        teaching_projects = TeachingProject.query.filter_by(teacher_id=current_user.id).all()
+        evaluation_projects =  EvaluationProject.query.filter_by(teacher_id=current_user.id).all()
+        research_paper = ResearchPaper.query.filter_by(teacher_id=current_user.id).all()
+
+    return render_template('teaching_research.html',
+                           is_admin_teacher=is_admin_teacher,
+                           teaching_projects=teaching_projects,
+                           evaluation_projects=evaluation_projects,
+                           research_paper=research_paper
+                         )
 
 @app.route('/api/teacher/courses', methods=['POST'])
 @login_required
@@ -1767,7 +1783,12 @@ def handle_teaching_projects():
 def handle_evaluation_projects():
     if request.method == 'GET':
         try:
-            projects = EvaluationProject.query.filter_by(teacher_id=current_user.id).all()
+            if current_user.username in ADMIN_TEACHERS:
+                #管理员查看所有教师项目
+                projects = EvaluationProject.query.all()
+            else:
+                #普通教师只能查看自己的
+                projects = EvaluationProject.query.filter_by(teacher_id=current_user.id).all()
             return jsonify({
                 'success': True,
                 'message': '获取成功',
@@ -1823,7 +1844,12 @@ def handle_evaluation_projects():
 def handle_research_papers():
     if request.method == 'GET':
         try:
-            papers = ResearchPaper.query.filter_by(teacher_id=current_user.id).all()
+            if current_user.username in ADMIN_TEACHERS:
+                #管理员查看所有教师项目
+                papers = ResearchPaper.query.all()
+            else:
+                #普通教师只能查看自己的
+                papers = ResearchPaper.query.filter_by(teacher_id=current_user.id).all()
             return jsonify({
                 'success': True,
                 'message': '获取成功',
@@ -2047,7 +2073,13 @@ def delete_competition(id):
 @login_required
 def scientific_research():
     """科研立项与成果页面"""
-    return render_template('scientific_research.html')
+    if current_user.username in ADMIN_TEACHERS:
+        # 管理员查看所有教师项目
+        scientificProject = ScientificProject.query.all()
+    else:
+        # 普通教师只能查看自己的
+        scientificProject = ScientificProject.query.filter_by(teacher_id=current_user.id).all()
+    return render_template('scientific_research.html',scientificProject=scientificProject)
 
 @app.route('/college_events')
 @login_required
