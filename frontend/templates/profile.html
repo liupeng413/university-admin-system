@@ -263,21 +263,23 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">所属教学团队</label>
-                                            <select class="form-select" name="teaching_team">
-                                                <option value="">请选择</option>
-                                            </select>
+                                            <input type="text" class="form-control" name="teaching_team"
+                                                   placeholder="请输入所属教学团队"
+                                                   value="{{ current_user.teaching_team or '' }}">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label">所属科研团队</label>
-                                            <select class="form-select" name="research_team">
-                                                <option value="">请选择</option>
-                                            </select>
+                                            <input type="text" class="form-control" name="research_team"
+                                                   placeholder="请输入所属科研团队"
+                                                   value="{{ current_user.research_team or '' }}">
                                         </div>
+
                                         <div class="col-md-6">
                                             <label class="form-label">所属课题组</label>
-                                            <select class="form-select" name="research_group">
-                                                <option value="">请选择</option>
-                                            </select>
+                                            <input type="text" class="form-control" name="project_group"
+                                                   placeholder="请输入所属课题组"
+                                                   value="{{ current_user.project_group or '' }}">
                                         </div>
                                     </div>
                                 </div>

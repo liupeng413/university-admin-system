@@ -52,7 +52,12 @@ class User(UserMixin, db.Model):
     subject = db.Column(db.String(50))  # 学科
     department = db.Column(db.String(100))  # 所属院系
     photo_path = db.Column(db.String(200))  # 照片路径
-    
+
+    # 团队归属
+    teaching_team = db.Column(db.String(100))  # 所属教学团队
+    research_team = db.Column(db.String(100))  # 所属科研团队
+    project_group = db.Column(db.String(100))  # 所属课题组
+
     # 教师特有字段
     hire_date = db.Column(db.Date)             # 入职日期
     

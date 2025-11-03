@@ -190,6 +190,11 @@ def profile():
             current_user.highest_title = request.form.get('highest_title') or None
             current_user.position = request.form.get('position') or None
             current_user.subject = request.form.get('subject') or None
+
+            # 新增：团队归属信息
+            current_user.teaching_team = request.form.get('teaching_team') or None
+            current_user.research_team = request.form.get('research_team') or None
+            current_user.project_group = request.form.get('project_group') or None
             
             # 处理日期字段
             def parse_date(date_str):
@@ -282,7 +287,7 @@ def logout():
 @app.route('/teachers')
 @login_required
 def teachers():
-    if current_user.role != 'admin':
+    if current_user.username in ADMIN_TEACHERS:
         flash('您没有权限访问该页面')
         return redirect(url_for('profile'))
     
@@ -306,7 +311,7 @@ def teachers():
 @app.route('/teacher/<int:id>')
 @login_required
 def view_teacher(id):
-    if current_user.role != 'admin':
+    if current_user.username in ADMIN_TEACHERS:
         flash('您没有权限访问该页面')
         return redirect(url_for('profile'))
     
@@ -316,7 +321,7 @@ def view_teacher(id):
 @app.route('/teacher/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_teacher(id):
-    if current_user.role != 'admin':
+    if current_user.username in ADMIN_TEACHERS:
         flash('您没有权限访问该页面')
         return redirect(url_for('profile'))
     
@@ -361,14 +366,14 @@ VALID_TITLES = ['教授', '副教授', '讲师', '助教']
 @login_required
 def edit_teacher_old(id):
     teacher = User.query.get_or_404(id)
-    if current_user.role != 'admin' and current_user.id != id:
+    if current_user.username not in ADMIN_TEACHERS and current_user.id != id:
         flash('您没有权限编辑此教师信息')
         return redirect(url_for('index'))
     
     if request.method == 'POST':
         try:
             # 只有管理员可以修改工号
-            if current_user.role == 'admin':
+            if current_user.username in ADMIN_TEACHERS:
                 employee_number = request.form.get('employee_number', type=int)
                 if employee_number is not None:
                     teacher.employee_number = employee_number
@@ -416,7 +421,7 @@ def edit_teacher_old(id):
 @app.route('/files')
 @login_required
 def list_files():
-    if current_user.role == 'admin':
+    if current_user.username in ADMIN_TEACHERS:
         # 管理员可以看到所有文件
         files = File.query.all()
     else:
@@ -430,7 +435,7 @@ def delete_file(filename):
     file = File.query.filter_by(filename=filename).first_or_404()
     
     # 检查权限：只有文件所有者或管理员可以删除文件
-    if current_user.role != 'admin' and file.user_id != current_user.id:
+    if current_user.username not in ADMIN_TEACHERS and file.user_id != current_user.id:
         return '没有权限删除此文件', 403
     
     try:
@@ -485,7 +490,7 @@ def get_teacher_details(employee_id):
 @app.route('/api/teachers/<int:id>', methods=['PUT'])
 @login_required
 def update_teacher(id):
-    if current_user.role != 'admin':
+    if current_user.username in ADMIN_TEACHERS:
         return jsonify({'success': False, 'message': '没有权限进行此操作'}), 403
     
     teacher = User.query.get_or_404(id)
@@ -528,7 +533,7 @@ def get_user_role():
 @app.route('/teacher/<int:id>/update_employee_number', methods=['POST'])
 @login_required
 def update_employee_number(id):
-    if current_user.role != 'admin':
+    if current_user.username not in ADMIN_TEACHERS:
         flash('只有管理员可以修改工号')
         return redirect(url_for('teachers'))
     
@@ -605,7 +610,7 @@ def change_password():
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'admin':
+        if not current_user.is_authenticated or current_user.username in ADMIN_TEACHERS:
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
@@ -1199,7 +1204,6 @@ def handle_graduation_projects():
             # 处理附件上传
             file = request.files.get('attachment')
             if file:
-                from datetime import datetime
                 employee_number = current_user.employee_number
                 date_prefix = datetime.now().strftime('%Y-%m-%d')
                 filename = f"{date_prefix}_{file.filename}"
@@ -1261,7 +1265,6 @@ def handle_graduation_project(id):
                         os.remove(os.path.join(app.config['UPLOAD_FOLDER'], project.attachment_path))
                     except:
                         pass
-                from datetime import datetime
                 employee_number = current_user.employee_number
                 date_prefix = datetime.now().strftime('%Y-%m-%d')
                 filename = f"{date_prefix}_{file.filename}"
@@ -2184,7 +2187,6 @@ def add_innovation_project():
         # 处理附件上传
         file = request.files.get('attachment')
         if file and allowed_file(file.filename):
-            from datetime import datetime
             employee_number = current_user.employee_number or current_user.id
             date_prefix = datetime.now().strftime('%Y-%m-%d')
             filename = f"{date_prefix}_{file.filename}"
@@ -2545,7 +2547,7 @@ def handle_course(id):
 def get_scientific_projects():
     """获取科研立项列表"""
     try:
-        if current_user.role == 'admin':
+        if current_user.username in ADMIN_TEACHERS:
             projects = ScientificProject.query.all()
         else:
             projects = ScientificProject.query.filter_by(teacher_id=current_user.id).all()
@@ -2582,7 +2584,6 @@ def add_scientific_project():
         # 处理文件上传
         def save_file(file_obj, subfolder):
             if file_obj and file_obj.filename:
-                from datetime import datetime
                 employee_number = current_user.employee_number
                 date_prefix = datetime.now().strftime('%Y-%m-%d')
                 # 保留原始文件名（含中文），只加日期前缀
@@ -2741,7 +2742,7 @@ def delete_evaluation_project(id):
 def get_scientific_awards():
     """获取科研奖励列表"""
     try:
-        if current_user.role == 'admin':
+        if current_user.username in ADMIN_TEACHERS:
             awards = ScientificAward.query.all()
         else:
             awards = ScientificAward.query.filter_by(teacher_id=current_user.id).all()
@@ -2785,7 +2786,6 @@ def add_scientific_award():
         attachment = request.files.get('attachment')
         def save_file(file_obj):
             if file_obj and file_obj.filename:
-                from datetime import datetime
                 employee_number = current_user.employee_number or current_user.id
                 date_prefix = datetime.now().strftime('%Y-%m-%d')
                 filename = f"{date_prefix}_{file_obj.filename}"
