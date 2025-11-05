@@ -248,6 +248,7 @@ class TeachingProject(db.Model):
     """教务处所设立项模型"""
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    teacher_name = db.Column(db.String(50), nullable=False)  # 新增字段：教师姓名
     project_type = db.Column(db.String(50), nullable=False)  # 项目类型：课程建设/教学竞赛/教学成果奖/教学团队/教材建设
     project_name = db.Column(db.String(200), nullable=False)  # 项目名称
     project_level = db.Column(db.String(50))  # 项目级别
@@ -262,6 +263,7 @@ class TeachingProject(db.Model):
         return {
             'id': self.id,
             'teacher_id': self.teacher_id,
+            'teacher_name': self.teacher_name,
             'project_type': self.project_type,
             'project_name': self.project_name,
             'project_level': self.project_level,
@@ -276,6 +278,7 @@ class TeachingProject(db.Model):
 class EvaluationProject(db.Model):
     """评估中心所设立项模型"""
     id = db.Column(db.Integer, primary_key=True)
+    teacher_name = db.Column(db.String(30), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     project_type = db.Column(db.String(50), nullable=False)  # 项目类型：校级教改/省级教改/省级教学规划课题/其它
     project_name = db.Column(db.String(200), nullable=False)  # 项目名称
@@ -290,6 +293,7 @@ class EvaluationProject(db.Model):
         return {
             'id': self.id,
             'teacher_id': self.teacher_id,
+            'teacher_name': self.teacher_name,
             'project_type': self.project_type,
             'project_name': self.project_name,
             'project_level': self.project_level,

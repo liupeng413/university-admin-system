@@ -1765,6 +1765,7 @@ def handle_teaching_projects():
                 data['completion_date'] = datetime.strptime(data['completion_date'], '%Y-%m-%d').date()
             
             data['teacher_id'] = current_user.id
+            data['teacher_name'] = current_user.name
             project = TeachingProject(**data)
             db.session.add(project)
             db.session.commit()

@@ -41,6 +41,7 @@
                         <table class="table table-hover" id="teachingProjectsTable">
                             <thead class="table-light">
                                 <tr>
+                                    <th>负责人</th>
                                     <th>项目类型</th>
                                     <th>项目名称</th>
                                     <th>项目级别</th>
@@ -69,6 +70,7 @@
                         <table class="table table-hover" id="evaluationProjectsTable">
                             <thead class="table-light">
                                 <tr>
+                                    <th>负责人</th>
                                     <th>项目类型</th>
                                     <th>项目名称</th>
                                     <th>项目级别</th>
@@ -136,6 +138,10 @@
                         </select>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">负责人</label>
+                        <input type="text" class="form-control" name="teacher_name" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">项目名称</label>
                         <input type="text" class="form-control" name="project_name" required>
                     </div>
@@ -192,6 +198,10 @@
                             <option value="省级教学规划课题">省级教学规划课题</option>
                             <option value="其它">其它</option>
                         </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">负责人</label>
+                        <input type="text" class="form-control" name="teacher_name" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">项目名称</label>
@@ -357,6 +367,7 @@ function loadTeachingProjects() {
             data.data.forEach(project => {
                 tbody.innerHTML += `
                     <tr>
+                        <td>${project.teacher_name}</td>
                         <td>${project.project_type}</td>
                         <td>${project.project_name}</td>
                         <td>${project.project_level || ''}</td>
@@ -394,6 +405,7 @@ function loadEvaluationProjects() {
             data.data.forEach(project => {
                 tbody.innerHTML += `
                     <tr>
+                        <td>${project.teacher_name}</td>
                         <td>${project.project_type}</td>
                         <td>${project.project_name}</td>
                         <td>${project.project_level || ''}</td>
