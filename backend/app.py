@@ -191,11 +191,11 @@ def profile():
             current_user.position = request.form.get('position') or None
             current_user.subject = request.form.get('subject') or None
 
-            # 新增：团队归属信息
-            current_user.teaching_team = request.form.get('teaching_team') or None
-            current_user.research_team = request.form.get('research_team') or None
-            current_user.project_group = request.form.get('project_group') or None
-            
+            # # 新增：团队归属信息
+            # current_user.teaching_team = request.form.get('teaching_team') or None
+            # current_user.research_team = request.form.get('research_team') or None
+            # current_user.project_group = request.form.get('project_group') or None
+            #
             # 处理日期字段
             def parse_date(date_str):
                 if date_str and date_str.strip():
