@@ -1,35 +1,26 @@
-name: Deploy to Aliyun
+name: 自动部署到阿里云
 
 on:
   push:
     branches:
-      - main   # 只在 main 分支推送时触发
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.8.0
+      - name: 部署到阿里云服务器
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Rsync code to server
-        run: |
-          rsync -az --delete \
-            --exclude-from=".rsyncignore" \
-            -e "ssh -o StrictHostKeyChecking=no" \
-            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}
-      
-      - name: Remote deploy
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-          "bash /srv/deploy/university-admin/deploy.sh"
-
-      - name: Health check
-        run: |
-          curl -f http://${{ secrets.SSH_HOST }}/health
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /var/www/university-admin-system
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt -q
+            sudo systemctl restart university-admin
+            echo "✅ 部署完成！"
